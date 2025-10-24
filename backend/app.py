@@ -6,6 +6,7 @@ import pandas as pd
 import tensorflow as tf
 import matplotlib.pyplot as plt
 import io
+import os
 import base64
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import image
@@ -15,8 +16,13 @@ from PIL import Image
 app = Flask(__name__)
 CORS(app)
 
+WEBLINKS = {
+        0: 'C:/Users/marto/Desktop/meningioma/meningioma.html',
+        1: 'C:/Users/marto/Desktop/glioma/glioma.html',
+        2: 'C:/Users/marto/Desktop/amd/amd.html'
+    }
 
-y_test = np.loadtxt('brainTumor_y_test.txt',dtype=float)
+y_test = np.load('brainTumor_y_test.npy',allow_pickle=True)
 X_test = np.load('brainTumor_X_test.npy',allow_pickle=True)
 
 
@@ -48,15 +54,15 @@ def confusion_matrix():
 @app.route('/model1/summary')
 def summary():
     report = model_classification_report(brainTumorModel, X_test, y_test)
+    
     return jsonify({
         'model': 'Brain Tumor Classification Model',
-        'accuracy': float(accuracy_score(y_test, predicted_classes(brainTumorModel, X_test))),
-        'loss': float(np.mean(brainTumorHistory.history['loss'])),
-        'val_loss': float(np.mean(brainTumorHistory.history['val_loss'])),
-        'precision': float(report['weighted avg']['precision']),
-        'recall': float(report['weighted avg']['recall']),
-        'f1_score': float(report['weighted avg']['f1-score']),
-        'confusion_matrix': confusion_matrix()
+        'accuracy': float(accuracy_score(y_test, predicted_classes(brainTumorModel, X_test))),  #close to 1
+        'loss': float(np.mean(brainTumorHistory.history['loss'])),  #close to 0
+        'val_loss': float(np.mean(brainTumorHistory.history['val_loss'])),  #close to 0
+        'precision': float(report['weighted avg']['precision']),    #close to 1
+        'recall': float(report['weighted avg']['recall']),      #close to 1
+        'f1_score': float(report['weighted avg']['f1-score']),   #close to 1
     })
 
 @app.route('/api/upload', methods=['POST'])
@@ -102,6 +108,7 @@ def image_analyze_result():
     tumor_type = request.args.get('type', type=int)
     accuracy = request.args.get('accuracy',type=float)
     #1 for meningioma, 2 for glioma, 3 for pituitary tumor
+    
     print("Tumor type received:", tumor_type)
     if tumor_type == 0:
         result = {
@@ -112,10 +119,10 @@ def image_analyze_result():
             "akkor életveszélyesek is lehetnek. Főbb tünetei a "
             "fejfájás, a kéz és láb gyengesége, ezenkívül más "
             "tünetei is lehetnek. ",
-            "link": "https://orvos24.com/meningioma-tunetek-okok-kezelesek'>https://orvos24.com/meningioma-tunetek-okok-kezelesek",
+            "link": 'http://localhost:5000/disease/0', #"https://orvos24.com/meningioma-tunetek-okok-kezelesek'>https://orvos24.com/meningioma-tunetek-okok-kezelesek",
             "accuracy": accuracy,
         }
-    elif tumor_type == 0:
+    elif tumor_type == 1:
         result = {
             "label": 'Glióma',
             "content": "Egyfajta daganat, amely az agyban és a "
@@ -124,9 +131,9 @@ def image_analyze_result():
             "működését. Az agydaganatok leggyakoribb típusa. "
             "Többféle tünete lehet, amik főleg az agy működésében "
             "és az idegrendszerben való változásra utalnak. ",
-            "link": "https://orvos24.com/a-glioma-tunetei-es-okai",
+            "link": 'http://localhost:5000/disease/1', #"https://orvos24.com/a-glioma-tunetei-es-okai",
             "accuracy": accuracy,}
-    elif tumor_type == 1:
+    elif tumor_type == 2:
         result = {
             "label": 'Agyalapi mirigy daganat',
             "content": "A legtöbb ilyen típusú elváltozás "
@@ -135,7 +142,7 @@ def image_analyze_result():
             "eljárások segíthetnek a diagnózisban. Ez a fajta "
             "daganat nem terjed át más szervekre viszont a "
             "szervezet hormontermelése megváltozhat. ",
-            "link": "https://egeszsegvonal.gov.hu/egeszseg-a-z/a-a/agyalapi-mirigy-daganata.html",
+            "link": 'http://localhost:5000/disease/2',#"https://egeszsegvonal.gov.hu/egeszseg-a-z/a-a/agyalapi-mirigy-daganata.html",
             "accuracy": accuracy,}
     else:
         result = {
@@ -166,6 +173,21 @@ def image_analyze_result():
     result["placeOfTumor"] = base64_img
     return jsonify(result)
 
+@app.route('/disease/<int:tumor_type>', methods=['GET'])
+def disease_info(tumor_type):
+   
+    # Lekérjük az elérési utat
+    file_path = WEBLINKS[tumor_type]
+    print(f"Fájl elérési útja: {file_path}")
+    
+    # Ellenőrzés: létezik-e a fájl?
+    if not os.path.exists(file_path):
+        print(f"HIBA: A fájl nem található: {file_path}")
+        return jsonify({'error': f'Fájl nem található: {file_path}'}), 404
+    
+    # Ha minden ok, serve-eljük a fájlt
+    print(f"OK - Fájl serve-elése: {file_path}")
+    return send_file(file_path, mimetype='text/html')
 
 if __name__ == '__main__':
     app.run(port=5000,debug=False)
