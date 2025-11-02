@@ -4,12 +4,13 @@ import joblib as jl
 import numpy as np
 import pandas as pd
 import tensorflow as tf
+import matplotlib
 import matplotlib.pyplot as plt
-import io
 import os
-import base64
+import torch
+from monai.networks.nets import UNet
 from tensorflow.keras.models import load_model
-from tensorflow.keras.preprocessing import image
+from tensorflow.keras.preprocessing.image import img_to_array
 from sklearn.metrics import accuracy_score, classification_report
 from PIL import Image
 
@@ -28,8 +29,6 @@ X_test = np.load('brainTumor_X_test.npy',allow_pickle=True)
 
 brainTumorModel = load_model('models/BrainTumorClassificationModel.h5')
 brainTumorHistory = jl.load('models/BrainTumorClassificationHistory.pkl')
-
-u_netModel = load_model('models/unet_model.h5')
 
 def prediction (model, X):
     predicted = model.predict(X)
@@ -67,39 +66,56 @@ def summary():
 
 @app.route('/api/upload', methods=['POST'])
 def upload_file():
+    static_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static')
+    os.makedirs(static_dir, exist_ok=True)
+
     img_size = (256,256)
 
     get = request.files['image']
-    print ("Type:", type(get))
-    #print("Shape:", get.shape)
-    #print("Min:", get.min(), "Max:", img.max())
-    #print("Dtype:", get.dtype)
-    print("Eddig jó")
-    img = Image.open(get.stream).convert('L').resize(img_size) 
-    print ("Type:", type(get))
+    img = Image.open(get.stream).convert('L').resize(img_size)
 
-    img = image.img_to_array(img)
+    img = img_to_array(img)
     img = img / 255.0  
     img = np.expand_dims(img,axis=0)
-
-    #img_tf = tf.convert_to_tensor(image, dtype=tf.float32)
     
-    
-    print ("Type:", type(img))
-    print("Shape:", img.shape)
-    print("Min:", img.min(), "Max:", img.max())
-    print("Dtype:", img.dtype)
-    print("Eddig jó")
-    
-    pred = brainTumorModel.predict(img) # mi történik ?
+    pred = brainTumorModel.predict(img)
     pred_class = int(np.argmax(pred,axis=1)[0]) # 1 for meningioma, 2 for glioma, 3 for pituitary tumor
     pred_prob = float(np.max(pred))
-    print ("Pred:", pred)
-    #PlaceOfTumor = u_netModel.predict(image)
+
+    if pred_class != 4:
+        model = UNet(
+            spatial_dims=2,
+            in_channels=1,       
+            out_channels=1,      
+            channels=(16, 32, 64, 128, 256),
+            strides=(2, 2, 2, 2),
+            num_res_units=2,
+        ).to("cpu")
+        
+        model.load_state_dict(torch.load('models/unet_weights.pth', map_location=torch.device('cpu')))
+        model.eval()
+
+        image = np.transpose(img,(0,3,1,2))
+        image = torch.tensor(image,dtype=torch.float32)
+        output = model(image)
+        preds = torch.sigmoid(output)
+        binary_preds = (preds>0.5).float()
+        matplotlib.use('Agg')
+        plt.figure(figsize=(12, 8))
+        plt.imshow(binary_preds[0][0].cpu(), cmap='Reds')
+        plt.imshow(img[0][:,:,0], cmap='gray', alpha=0.5)
+        plt.axis('off')
+        result_path = os.path.join(static_dir, 'result.jpg')
+
+        plt.savefig(result_path, bbox_inches='tight', pad_inches=0)
+
+    
+
     print(f"Predicted class: {pred_class}, Probability: {pred_prob}")
     return jsonify({'message': 'Image received successfully', 
                     'prediction': pred_class,
-                    'accuracy': pred_prob
+                    'accuracy': pred_prob,
+                    'result_image': f'http://localhost:5000/static/result.jpg' if pred_class != 4 else 0
                     })
 
 
@@ -151,26 +167,6 @@ def image_analyze_result():
             "accuracy": accuracy,
         }
 
-    unet_model = brainTumorModel.predict(X_test)
-
-    '''fig, ax = plt.subplots()
-    ax.imshow(unet_model, cmap='gray')    
-    ax.axis('off')'''
-
-    if unet_model.shape[-1] > 1:
-        mask = np.argmax(unet_model, axis=-1)
-    else:
-        mask = (unet_model.squeeze() > 0.5).astype(np.uint8)
-
-    mask_img = (mask * 255).astype(np.uint8)
-
-    buf =io.BytesIO()
-    Image.fromarray(mask_img).save(buf, format='JPEG')
-    buf.seek(0)
-    base64_img = base64.b64encode(buf.getvalue()).decode('utf-8')
-    #print(base64_img)
-    result["placeOfTumorLabel"] = "Agytumor helye"
-    result["placeOfTumor"] = base64_img
     return jsonify(result)
 
 @app.route('/disease/<int:tumor_type>', methods=['GET'])
@@ -180,13 +176,9 @@ def disease_info(tumor_type):
     file_path = WEBLINKS[tumor_type]
     print(f"Fájl elérési útja: {file_path}")
     
-    # Ellenőrzés: létezik-e a fájl?
     if not os.path.exists(file_path):
-        print(f"HIBA: A fájl nem található: {file_path}")
         return jsonify({'error': f'Fájl nem található: {file_path}'}), 404
     
-    # Ha minden ok, serve-eljük a fájlt
-    print(f"OK - Fájl serve-elése: {file_path}")
     return send_file(file_path, mimetype='text/html')
 
 if __name__ == '__main__':

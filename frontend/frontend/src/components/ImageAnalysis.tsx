@@ -16,6 +16,7 @@ import { Card, Typography } from "@mui/material";
 async function handleOnChange(image: any) {
   let tumortype = 0;
   let accuracy = 0.0;
+  let result_image = "";
   try {
     const formData = new FormData();
     formData.append("image", image.file);
@@ -28,24 +29,24 @@ async function handleOnChange(image: any) {
     console.log("Success:", resp);
     tumortype = Number(resp.prediction);
     accuracy = Number(resp.accuracy);
+    result_image = resp.result_image;
   } catch (error) {
     console.error("Error", error);
   }
-  return tumortype + "," + accuracy;
+  return tumortype + "," + accuracy + "," + result_image;
 }
 
 const ImageAnalysis = () => {
   const [image, setImage] = React.useState([]);
-  const [accuracy, setAccuracy] = useState(0.0);
   const [showDetails, setShowDetails] = useState(false);
   const [tumorType, setTumorType] = useState(0);
+  const [accuracy, setAccuracy] = useState(0.0);
+  const [resultImage, setResultImage] = useState("");
   const [resultData, setResultData] = useState({
     label: null,
     content: null,
     accuracy: null,
     link: "",
-    placeOfTumorLabel: null,
-    placeOfTumor: React.useState<string>(""),
   });
 
   useEffect(() => {
@@ -59,8 +60,6 @@ const ImageAnalysis = () => {
           content: data.content,
           accuracy: data.accuracy,
           link: data.link,
-          placeOfTumorLabel: data.placeOfTumorLabel,
-          placeOfTumor: data.placeOfTumor,
         });
       })
       .catch((error) => console.error("Error fetching message:", error));
@@ -147,10 +146,12 @@ const ImageAnalysis = () => {
                             color="success"
                             onClick={() => {
                               handleOnChange(image).then((type) => {
-                                const t = parseInt(type.split(",")[0]);
-                                const a = parseFloat(type.split(",")[1]);
-                                setAccuracy(a);
-                                setTumorType(t);
+                                const a = type.split(",")[0];
+                                const l = type.split(",")[1];
+                                const result_image = type.split(",")[2];
+                                setTumorType(Number(a));
+                                setAccuracy(Number(l));
+                                setResultImage(result_image);
                               });
                               setShowDetails(true);
                             }}
@@ -220,12 +221,16 @@ const ImageAnalysis = () => {
               borderColor: "#073c8bff",
             }}
           >
-            <Typography variant="h5">
-              {resultData.placeOfTumorLabel}:
-            </Typography>
+            <Typography variant="h5">Agyi tumor helye:</Typography>
             <img
-              src={`data:image/jpeg;base64,${image}`}
+              src={resultImage}
               alt="Place of the tumor"
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "contain",
+                padding: "5px",
+              }}
             />
           </Card>
         </Box>
