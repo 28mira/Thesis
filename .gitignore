@@ -257,3 +257,4 @@ yarn-error.log*
 *.pkl
 *.npy
 *.h5
+*.jpg
