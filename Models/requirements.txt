@@ -1,0 +1,11 @@
+pandas
+numpy
+matplotlib 
+Pillow
+h5py
+torchvision
+tensorflow
+tensorflow.keras
+scikit-learn
+monai
+cv2
