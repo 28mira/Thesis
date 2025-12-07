@@ -8,4 +8,4 @@ tensorflow
 tensorflow.keras
 scikit-learn
 monai
-cv2
+opencv-python

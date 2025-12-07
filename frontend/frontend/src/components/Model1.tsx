@@ -31,20 +31,6 @@ const CompareModel = () => {
   }, []);
 
   return (
-    /*<Stack
-      direction="column"
-      alignItems="center"
-      justifyContent="center"
-      textAlign="center"
-      width="75%"
-      height="min-content"
-      bgcolor="#ffffffff"
-      color="#002360ff"
-      padding={2}
-      marginTop={3}
-      borderRadius={10}
-      display="flex"
-    >*/
     <Box
       flexDirection="row"
       alignItems="flex-start"

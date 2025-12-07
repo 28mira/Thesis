@@ -4,7 +4,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
 import h5py
-#from torchvision import transforms
 import tensorflow as tf
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, classification_report
@@ -65,22 +64,7 @@ def loadImages():
                 X.append(image_array)
     return X
 
-def loadNormalImages(X, y):
-    input_folder = r'C:\Users\marto\Desktop\Szakdolgozat\pogram\brainTumor\Normal'
-    for file_name in sorted(os.listdir(input_folder)):
-            if file_name.endswith('.jpg'):
-                file_path = os.path.join(input_folder,file_name)
-                
-                img = preprocessing.image.load_img(file_path,target_size=(256, 256),
-                                                    color_mode="grayscale")
-                image_array = preprocessing.image.img_to_array(img)
-                image_array = image_array/255.0
-
-                X.append(image_array)
-                y.append(3)
-    return np.array(X,dtype="float32"), np.array(y,dtype="int")
-
-def loadImages(X, y):
+def loadNormalImages(X,y):
     input_folder = r'C:\Users\marto\Desktop\Szakdolgozat\pogram\brainTumor\Normal'
     for file_name in sorted(os.listdir(input_folder)):
             if file_name.endswith('.jpg'):
@@ -137,8 +121,9 @@ def predictImages(model, X, y):
     print(f"Predikált osztály: {pred_class}, valószínűség: {pred_prob:.2f}, valós címke: {y[1]}")
 
 def main():
+    X, y = [], []
     X, y = loadImages(), loadLabels()
-    X, y = loadNormalImages(X, y)
+    X, y = loadNormalImages(X,y)
     
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
 
