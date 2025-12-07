@@ -168,7 +168,7 @@ const ImageAnalysis = () => {
           </div>
         </Card>
       </Box>
-      {showDetails && (
+      {showDetails && resultImage && (
         <Box
           flexDirection="row"
           alignItems="flex-start"

@@ -31,7 +31,7 @@ def LoadImageAndMask():
             image = image.astype(np.float64)
             image = 255*(image-image.min())/(image.max()-image.min() + eps)
             image = cv2.resize(image,img_size)
-            image_norm = torch.tensor(image,dtype=úŐtorch.float32)/255.0
+            image_norm = torch.tensor(image,dtype=torch.float32)/255.0
             image = image_norm.unsqueeze(0)
 
             tumor_mask = tumor_mask.astype(np.float64)
@@ -41,8 +41,6 @@ def LoadImageAndMask():
             mask =tumor_mask_norm.unsqueeze(0)
             mask = (mask>0.5).float()
 
-            #image = torch.tensor(image, dtype=torch.float32)
-            #mask = torch.tensor(mask, dtype=torch.float32)
             datas.append((image,mask))
             
     return datas

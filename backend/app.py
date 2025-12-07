@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify, send_file, send_from_directory
 from flask_cors import CORS
 import joblib as jl
 import numpy as np
@@ -14,13 +14,13 @@ from tensorflow.keras.preprocessing.image import img_to_array
 from sklearn.metrics import accuracy_score, classification_report
 from PIL import Image
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static_folder')
 CORS(app)
 
 WEBLINKS = {
-        0: 'C:/Users/marto/Desktop/meningioma/meningioma.html',
-        1: 'C:/Users/marto/Desktop/glioma/glioma.html',
-        2: 'C:/Users/marto/Desktop/amd/amd.html'
+        0: 'meningioma/meningioma.html',
+        1: 'glioma/glioma.html',
+        2: 'amd/amd.html'
     }
 
 y_test = np.load('brainTumor_y_test.npy',allow_pickle=True)
@@ -66,8 +66,8 @@ def summary():
 
 @app.route('/api/upload', methods=['POST'])
 def upload_file():
-    static_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static')
-    os.makedirs(static_dir, exist_ok=True)
+    static_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static_folder')
+    os.makedirs(app.static_folder, exist_ok=True)
 
     img_size = (256,256)
 
@@ -115,7 +115,7 @@ def upload_file():
     return jsonify({'message': 'Image received successfully', 
                     'prediction': pred_class,
                     'accuracy': pred_prob,
-                    'result_image': f'http://localhost:5000/static/result.jpg' if pred_class != 4 else 0
+                    'result_image': f'http://localhost:5000/image/result.jpg' if pred_class != 4 else 0
                     })
 
 
@@ -135,7 +135,7 @@ def image_analyze_result():
             "akkor életveszélyesek is lehetnek. Főbb tünetei a "
             "fejfájás, a kéz és láb gyengesége, ezenkívül más "
             "tünetei is lehetnek. ",
-            "link": 'http://localhost:5000/disease/0', #"https://orvos24.com/meningioma-tunetek-okok-kezelesek'>https://orvos24.com/meningioma-tunetek-okok-kezelesek",
+            "link": f"http://localhost:5000/pages/{WEBLINKS[tumor_type]}", #"https://orvos24.com/meningioma-tunetek-okok-kezelesek'>https://orvos24.com/meningioma-tunetek-okok-kezelesek",
             "accuracy": accuracy,
         }
     elif tumor_type == 1:
@@ -147,7 +147,7 @@ def image_analyze_result():
             "működését. Az agydaganatok leggyakoribb típusa. "
             "Többféle tünete lehet, amik főleg az agy működésében "
             "és az idegrendszerben való változásra utalnak. ",
-            "link": 'http://localhost:5000/disease/1', #"https://orvos24.com/a-glioma-tunetei-es-okai",
+            "link": f'http://localhost:5000/pages/{WEBLINKS[tumor_type]}', #"https://orvos24.com/a-glioma-tunetei-es-okai",
             "accuracy": accuracy,}
     elif tumor_type == 2:
         result = {
@@ -158,7 +158,7 @@ def image_analyze_result():
             "eljárások segíthetnek a diagnózisban. Ez a fajta "
             "daganat nem terjed át más szervekre viszont a "
             "szervezet hormontermelése megváltozhat. ",
-            "link": 'http://localhost:5000/disease/2',#"https://egeszsegvonal.gov.hu/egeszseg-a-z/a-a/agyalapi-mirigy-daganata.html",
+            "link": f'http://localhost:5000/pages/{WEBLINKS[tumor_type]}',#"https://egeszsegvonal.gov.hu/egeszseg-a-z/a-a/agyalapi-mirigy-daganata.html",
             "accuracy": accuracy,}
     else:
         result = {
@@ -168,6 +168,14 @@ def image_analyze_result():
         }
 
     return jsonify(result)
+
+@app.route('/image/<path:filename>')
+def serve_image(filename):
+    return send_from_directory(app.static_folder, filename)
+
+@app.route('/pages/<path:filename>')
+def websites(filename):
+    return send_from_directory(app.static_folder, filename)
 
 @app.route('/disease/<int:tumor_type>', methods=['GET'])
 def disease_info(tumor_type):
