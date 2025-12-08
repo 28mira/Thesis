@@ -254,11 +254,9 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-static_folder/
+
 
 *.pkl
 *.npy
 *.h5
 *.jpg
-*.png
-*.letöltés
