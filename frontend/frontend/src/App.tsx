@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import Introduction from "./components/Introduction";
 import Box from "@mui/material/Box";
 import ImageAnalysis from "./components/ImageAnalysis";
-import CompareModel from "./components/CompareModel";
+import ImageConverter from "./components/ImageConverter";
+import UserModel from "./components/UserModel";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import Model1 from "./components/Model1";
@@ -24,7 +25,8 @@ function App() {
       <Introduction />
       <ImageAnalysis />
       <Model1 />
-
+      <ImageConverter />
+      <UserModel />
       <Footer />
     </Box>
     //<div>{message}</div>

@@ -7,11 +7,15 @@ import tensorflow as tf
 import matplotlib
 import matplotlib.pyplot as plt
 import os
+import shutil
 import torch
 from monai.networks.nets import UNet
+from tensorflow.keras import preprocessing
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.image import img_to_array
 from sklearn.metrics import accuracy_score, classification_report
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
 from PIL import Image
 
 app = Flask(__name__, static_folder='static_folder')
@@ -20,7 +24,10 @@ CORS(app)
 WEBLINKS = {
         0: 'meningioma/meningioma.html',
         1: 'glioma/glioma.html',
-        2: 'amd/amd.html'
+        2: 'amd/amd.html',
+        3: '',
+        4: '',  #https://gyogyaszportal.hu/agyverzes/
+        5: ''   #https://egeszsegvonal.gov.hu/egeszseg-a-z/a-a/agyi-infarktus.html
     }
 
 y_test = np.load('brainTumor_y_test.npy',allow_pickle=True)
@@ -82,7 +89,7 @@ def upload_file():
     pred_class = int(np.argmax(pred,axis=1)[0]) # 1 for meningioma, 2 for glioma, 3 for pituitary tumor
     pred_prob = float(np.max(pred))
 
-    if pred_class != 4:
+    if pred_class == 0 or pred_class == 1 or pred_class == 2:
         model = UNet(
             spatial_dims=2,
             in_channels=1,       
@@ -115,9 +122,53 @@ def upload_file():
     return jsonify({'message': 'Image received successfully', 
                     'prediction': pred_class,
                     'accuracy': pred_prob,
-                    'result_image': f'http://localhost:5000/image/result.jpg' if pred_class != 4 else 0
+                    'result_image': f'http://localhost:5000/image/result.jpg' if pred_class == 0 or pred_class == 1 or pred_class == 2 else None
                     })
 
+
+@app.route('/api/convert', methods=['POST'])
+def convert_images():
+    if os.path.exists('output_images'):
+        shutil.rmtree('output_images')
+    os.makedirs('output_images', exist_ok=True)
+    for file in request.files.getlist('images'):
+        img = Image.open(file.stream).convert('RGB')
+        img.save('output_images/' + os.path.splitext(file.filename)[0] + '.jpg', "JPEG")
+    return jsonify({'message': 'A képek sikeresen konvertálva lettek.'})
+
+@app.route('/api/userModel', methods=['POST'])
+def user_model():
+    input_folder = '/Normal_images'
+    db = 0
+    for file_name in sorted(os.listdir(input_folder)):
+            if file_name.endswith('.jpg'):
+                file_path = os.path.join(input_folder,file_name)
+                
+                img = preprocessing.image.load_img(file_path,target_size=(256, 256),
+                                                    color_mode="grayscale")
+                image_array = preprocessing.image.img_to_array(img)
+                image_array = image_array/255.0
+                db+=1
+                X.append(image_array)
+                y.append(1)
+
+    files = request.files.getlist("images")
+    X = []
+    y = []
+    for get in files:
+        img_size = (256,256)
+        img = Image.open(get.stream).convert('L').resize(img_size)
+
+        img = img_to_array(img)
+        img = img / 255.0  
+        img = np.expand_dims(img,axis=0)
+        X.append(img)
+        y.append(0) 
+    epochs = int(request.form.get("epochs"))
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
+    model = LogisticRegression(max_iter=epochs)
+    model.fit(np.array(X_train).reshape(len(X_train), -1), y_train)
+    return jsonify({'message': f'Sikeresen megkaptuk a fájlokat és az epoch számot: {len(files)} fájl és {epochs} epoch.'})
 
 @app.route('/imageAnalyze/result', methods=['GET'])
 def image_analyze_result():
@@ -159,6 +210,38 @@ def image_analyze_result():
             "daganat nem terjed át más szervekre viszont a "
             "szervezet hormontermelése megváltozhat. ",
             "link": f'http://localhost:5000/pages/{WEBLINKS[tumor_type]}',#"https://egeszsegvonal.gov.hu/egeszseg-a-z/a-a/agyalapi-mirigy-daganata.html",
+            "accuracy": accuracy,}
+    elif tumor_type == 3:    
+        result = {
+            "label": 'Egészséges kép',
+            "content": "A feltöltött képen nem található semmilyen elváltozás/tumor.",
+            "link": f'http://localhost:5000/pages/{WEBLINKS[tumor_type]}',
+            "accuracy": accuracy,}
+    elif tumor_type == 4:    
+        result = {
+            "label": 'Agyvérzés',
+            "content": "Az agyvérzés egy életveszélyes állapot, amikor az agyban egy agyi ér" 
+                        "sérül és elpattan. Az agyban vérzés alakul ki, ez kívülről nem látszik, és ezáltal" 
+                        "a koponyában felgyülemlik a vér és megnő a nyomás, ami meg tudja ölni az agyi sejteket." 
+                        "Ez meg tudja gátolni a további vér és oxigén ellátását az agynak, ami szükséges a működéshez"
+                        " és a túléléshez. Az agyvérzésnek több tünete is lehet ami gyorsan rosszabbodhat és agykárosodást"
+                        " is okozhat, de akár halálos is lehet. Az agyvérzésnek tünete a fejfájás, szédülés, beszédnehézség" 
+                        "és a beszéd megértése, egy oldalas gyengeség, ez arcon is és kézen is jelentkezhet, ezeken kívül más"
+                        " tünet is jelentkezhet, de ha ilyen tüneteket vél felfedezni, minél előbb hívja a mentőket."
+                        "További tünetek és részletesebb leírás ezen a linken érhető el:",
+            "link": f'http://localhost:5000/pages/{WEBLINKS[tumor_type]}',
+            "accuracy": accuracy,}
+    elif tumor_type == 5:    
+        result = {
+            "label": "Agyi infarktus",
+            "content": "Az agyi infarktus nagyon hasonlít egy agyvérzéshez, mint tünetekben mint végeredményben is." 
+            "Viszont az esetek nagyobb részében agyi infarktusról beszélünk. Az agyi infarktus akkor alakul ki mikor" 
+            " az agy egy része nem kapnak vért  érelzáródás miatt. Mivel az agynak szüksége van folyamatos oxigén és "
+            "tápanyag ellátásra, ezért az agysejtek ilyen esetekben perceken belül nekiállnak meghalni. Az agyi infarktusnak " 
+            "főbb tünetei a beszédzavar, egy oldalas gyengeség, bénulás ami arcon vagy kézen jelentkezik. Ha ilyen tüneteket "
+            "vél felfedezni valakin hívja a mentőket és jegyzezze fel az időpontot mikor jelentkeztek elösszőr ezek a tünetek."
+            " Részletesebb leíráshoz olvasson tovább a következő linken:",
+            "link": f'http://localhost:5000/pages/{WEBLINKS[tumor_type]}',
             "accuracy": accuracy,}
     else:
         result = {
