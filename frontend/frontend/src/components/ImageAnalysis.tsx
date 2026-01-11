@@ -6,9 +6,7 @@ import FileUploadIcon from "@mui/icons-material/FileUpload";
 import ImageUploading from "react-images-uploading";
 import AddPohotoAlternate from "@mui/icons-material/AddPhotoAlternate";
 import { HideImage } from "@mui/icons-material";
-import Link from "@mui/material/Link";
-import Refresh from "@mui/icons-material/Refresh";
-import { set, useForm } from "react-hook-form";
+import Model1 from "./Model1";
 import { useState } from "react";
 import { useEffect } from "react";
 import { Card, Typography } from "@mui/material";
@@ -73,168 +71,163 @@ const ImageAnalysis = () => {
   return (
     <>
       <Box
-        flexDirection="column"
-        alignItems="flex-start"
-        justifyContent="center"
-        textAlign="left"
-        width="75%"
-        height="min-content"
-        bgcolor="#ffffffff"
-        padding={2}
-        marginTop={3}
-        display={{ xs: "block", md: "flex" }}
+        sx={{
+          borderRadius: 10,
+          color: "#aee0ffff",
+          borderColor: "#002360ff",
+          backgroundColor: "#546d8fff",
+          borderStyle: "solid",
+          borderWidth: 1.5,
+          padding: 2,
+          margin: 2,
+          width: "75%",
+          textAlign: "left",
+          flexDirection: "column",
+          display: { xs: "block", md: "flex" },
+        }}
       >
-        <Card
-          variant="outlined"
+        <Typography variant="h3">Képelemzés</Typography>
+        <Typography variant="body1" sx={{ marginTop: 2, marginBottom: 2 }}>
+          Mestereséges intelligencia segítségével elemzésre kerül az ide
+          feltöltött kép, ami 6 féle diagnózist adhat vissza. A modell 3 féle
+          elváltozást ismer fel ezek a meningeóma, a glióma és az agyalapi
+          mirigy daganat, ezeken kívül lehet más fajta elváltozás is és teljesen
+          egészséges kép az agyról.
+        </Typography>
+
+        <div className="imageUpload" style={{ textAlign: "center" }}>
+          <ImageUploading
+            value={image}
+            onChange={onChange}
+            dataURLKey="data_url"
+            acceptType={["jpg"]}
+          >
+            {({ imageList, onImageUpload, onImageRemove }) => (
+              <div>
+                <Tooltip title="Kép feltöltése">
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={onImageUpload}
+                  >
+                    <AddPohotoAlternate />
+                  </Button>
+                </Tooltip>
+                {imageList.map((image, index) => (
+                  <div key={index} className="imageItem">
+                    <Box sx={{ margin: 1 }}>
+                      <img
+                        src={image["data_url"]}
+                        alt="image"
+                        width="100"
+                        style={{ borderRadius: "15px" }}
+                      />
+                    </Box>
+                    <div>
+                      <Tooltip title="Feltöltött kép eltávolítása">
+                        <Button
+                          sx={{ marginRight: 1 }}
+                          variant="contained"
+                          color="error"
+                          onClick={() => onImageRemove(index)}
+                        >
+                          <HideImage />
+                        </Button>
+                      </Tooltip>
+                      &nbsp;
+                      <Tooltip title="Feltöltött kép elemzése">
+                        <Button
+                          sx={{ marginRight: 1 }}
+                          variant="contained"
+                          color="success"
+                          onClick={() => {
+                            handleOnChange(image).then((type) => {
+                              const a = type.split(",")[0];
+                              const l = type.split(",")[1];
+                              const result_image = type.split(",")[2];
+                              setTumorType(Number(a));
+                              setAccuracy(Number(l));
+                              setResultImage(result_image);
+                            });
+                            setShowDetails(true);
+                          }}
+                        >
+                          <FileUploadIcon />
+                        </Button>
+                      </Tooltip>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </ImageUploading>
+        </div>
+      </Box>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "row",
+          width: "75%",
+        }}
+      >
+        {showDetails && resultImage && (
+          <Box
+            sx={{
+              flex: 1,
+              borderRadius: 10,
+              height: "min-content",
+              textAlign: "left",
+              border: "1.5px solid #002360ff",
+              color: "#aee0ffff",
+              backgroundColor: "#546d8fff",
+              padding: 2,
+              margin: 1,
+            }}
+          >
+            <Box>
+              <Typography variant="h4" sx={{ padding: 2 }}>
+                {resultData.label}:
+              </Typography>
+              <Typography sx={{ width: "90%", height: "90%" }}>
+                {resultData.content}
+              </Typography>
+              <a
+                href={resultData.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: "#002360ff" }}
+              >
+                Ide kettintva tudsz tovább olvasni
+              </a>
+            </Box>
+            <Box>
+              <Typography variant="h4" sx={{ padding: 2, color: "#aee0ffff" }}>
+                Az elváltozás helye:
+              </Typography>
+              <img
+                src={resultImage}
+                alt="Place of the tumor"
+                style={{
+                  width: "100%",
+                  height: "80%",
+                  objectFit: "contain",
+                  padding: "5px",
+                  borderRadius: "30px",
+                }}
+              />
+            </Box>
+          </Box>
+        )}
+        <Box
           sx={{
-            flexDirection: "column",
-            padding: 3,
-            marginBottom: 3,
-            borderRadius: 10,
-            color: "#002360ff",
-            borderColor: "#073c8bff",
+            flex: 1,
+            height: "min-content",
+            textAlign: "left",
           }}
         >
-          <Typography variant="h3">Képelemzés</Typography>
-          <Typography variant="body1" sx={{ marginTop: 2, marginBottom: 2 }}>
-            Mestereséges intelligencia segítségével elemzésre kerül az ide
-            feltöltött kép, ami 4 / 5 féle diagnózist adhat vissza. A modell 3
-            féle elváltozást ismer fel ezek a meningeóma, a glióma és az
-            agyalapi mirigy daganat, ezeken kívül lehet más fajta elváltozás is
-            és teljesen egészséges kép az agyról.
-          </Typography>
-
-          <div className="imageUpload" style={{ textAlign: "center" }}>
-            <ImageUploading
-              value={image}
-              onChange={onChange}
-              dataURLKey="data_url"
-              acceptType={["jpg"]}
-            >
-              {({ imageList, onImageUpload, onImageRemove }) => (
-                <div>
-                  <Tooltip title="Kép feltöltése">
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={onImageUpload}
-                    >
-                      <AddPohotoAlternate />
-                    </Button>
-                  </Tooltip>
-                  {imageList.map((image, index) => (
-                    <div key={index} className="imageItem">
-                      <Box sx={{ margin: 1 }}>
-                        <img src={image["data_url"]} alt="image" width="100" />
-                      </Box>
-                      <div>
-                        <Tooltip title="Feltöltött kép eltávolítása">
-                          <Button
-                            sx={{ marginRight: 1 }}
-                            variant="contained"
-                            color="error"
-                            onClick={() => onImageRemove(index)}
-                          >
-                            <HideImage />
-                          </Button>
-                        </Tooltip>
-                        &nbsp;
-                        <Tooltip title="Feltöltött kép elemzése">
-                          <Button
-                            sx={{ marginRight: 1 }}
-                            variant="contained"
-                            color="success"
-                            onClick={() => {
-                              handleOnChange(image).then((type) => {
-                                const a = type.split(",")[0];
-                                const l = type.split(",")[1];
-                                const result_image = type.split(",")[2];
-                                setTumorType(Number(a));
-                                setAccuracy(Number(l));
-                                setResultImage(result_image);
-                              });
-                              setShowDetails(true);
-                            }}
-                          >
-                            <FileUploadIcon />
-                          </Button>
-                        </Tooltip>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </ImageUploading>
-          </div>
-        </Card>
-      </Box>
-      {showDetails && resultImage && (
-        <Box
-          flexDirection="row"
-          alignItems="flex-start"
-          justifyContent="space-between"
-          textAlign="left"
-          width="75%"
-          height="min-content"
-          bgcolor="#ffffffff"
-          padding={2}
-          marginTop={3}
-          display={{ xs: "block", md: "flex" }}
-        >
-          <Card
-            variant="outlined"
-            sx={{
-              flexDirection: "row",
-              width: "47%",
-              padding: 2,
-              marginBottom: 3,
-              borderRadius: 10,
-              color: "#002360ff",
-              borderColor: "#073c8bff",
-            }}
-          >
-            <Typography
-              variant="h3"
-              sx={{
-                marginBottom: 2,
-              }}
-            >
-              Eredmény
-            </Typography>
-            <Typography variant="h5">{resultData.label}:</Typography>
-            <Typography>{resultData.content}</Typography>
-            <a href={resultData.link} target="_blank" rel="noopener noreferrer">
-              Ide kettintva tudsz tovább olvasni
-            </a>
-          </Card>
-          <Card
-            variant="outlined"
-            sx={{
-              flexDirection: "row",
-              alignItems: "left",
-              width: "47%",
-              marginBottom: 3,
-              padding: 2,
-              height: { md: "380px", xs: "300px" },
-              borderRadius: 10,
-              color: "#002360ff",
-              borderColor: "#073c8bff",
-            }}
-          >
-            <Typography variant="h5">Agyi tumor helye:</Typography>
-            <img
-              src={resultImage}
-              alt="Place of the tumor"
-              style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "contain",
-                padding: "5px",
-              }}
-            />
-          </Card>
+          <Model1 />
         </Box>
-      )}
+      </Box>
     </>
   );
 };

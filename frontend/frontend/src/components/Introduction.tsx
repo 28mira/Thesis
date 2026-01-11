@@ -9,8 +9,8 @@ const Introduction = () => {
       justifyContent="center"
       textAlign="center"
       width="100%"
-      bgcolor="#08439cff"
-      color="#f0f0e1ff"
+      bgcolor="#002360ff"
+      color="#aee0ffff"
       padding={2}
       display={"flex"}
     >

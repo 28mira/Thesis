@@ -1,8 +1,12 @@
 import { useState, useEffect } from "react";
-import { Box, Paper, Stack } from "@mui/material";
-import { RadarChart } from "@mui/x-charts/RadarChart";
+import { Box, Typography, Stack } from "@mui/material";
+import { RadarChart } from "@mui/x-charts";
 
 const CompareModel = () => {
+  const stripeColor = (index: number) => {
+    return "#7e0000ff";
+  };
+
   const [modelData, setModelData] = useState({
     accuracy: null,
     loss: null,
@@ -38,42 +42,62 @@ const CompareModel = () => {
       textAlign="center"
       width="75%"
       height="min-content"
-      bgcolor="#9cccf2ff"
+      bgcolor="#7e0000ff"
       padding={2}
       marginTop={3}
       borderRadius={10}
+      border="1.5px solid #7e0000ff"
+      color={"#aee0ffff"}
     >
-      
-      <h3>Brain Trust Classification Model</h3>
-      <p>This is the introduction component.</p>
-      <RadarChart
-        height={300}
-        //width={300}
-        colors={["#c42020ff"]}
-        series={[
-          {
-            label: "Ditaiails",
-            data: [
-              Number(modelData.accuracy),
-              Number(modelData.loss),
-              Number(modelData.val_loss),
-              Number(modelData.precision),
-              Number(modelData.recall),
-              Number(modelData.f1_score),
-            ],
-          },
-        ]}
-        radar={{
-          metrics: [
-            { name: "Accuracy", max: 1, min: 0.3 },
-            { name: "Avg Loss", max: 0.0, min: 1.0 },
-            { name: "Avg Val Loss", max: 0.0, min: 1.0 },
-            { name: "Precision", max: 1, min: 0.3 },
-            { name: "Recall", max: 1, min: 0.3 },
-            { name: "F1 Score", max: 1, min: 0.3 },
-          ],
+      <Box>
+        <Typography variant="h4" sx={{ padding: 2 }}>
+          A kijelölő modell jellemzői:
+        </Typography>
+        <Typography variant="body1" sx={{ padding: 2 }}>
+          Az alábbi grafikon a modell különböző metrikáit mutatja be. Minél
+          közelebb vannak az értékek a külső körhöz, annál jobb a modell
+          teljesítménye az adott metrikában.
+        </Typography>
+      </Box>
+      <Box
+        sx={{
+          backgroundColor: "#aee0ffff",
+          borderRadius: 10,
         }}
-      />
+      >
+        <RadarChart
+          disableAxisListener={true}
+          stripeColor={stripeColor}
+          loading={false}
+          highlight="axis"
+          height={300}
+          colors={["#002360ff"]}
+          shape="circular"
+          series={[
+            {
+              label: "Ditaiails",
+              data: [
+                Number(modelData.accuracy),
+                Number(modelData.loss),
+                Number(modelData.val_loss),
+                Number(modelData.precision),
+                Number(modelData.recall),
+                Number(modelData.f1_score),
+              ],
+            },
+          ]}
+          radar={{
+            metrics: [
+              { name: "Accuracy", max: 1, min: 0.3 },
+              { name: "Avg Loss", max: 0.0, min: 1.0 },
+              { name: "Avg Val Loss", max: 0.0, min: 1.0 },
+              { name: "Precision", max: 1, min: 0.3 },
+              { name: "Recall", max: 1, min: 0.3 },
+              { name: "F1 Score", max: 1, min: 0.3 },
+            ],
+          }}
+        />
+      </Box>
     </Box>
   );
 };

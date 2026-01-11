@@ -45,10 +45,31 @@ const ImageAnalysis = () => {
     }
   };
   return (
-    <>
-      <Typography>Kép konvertálás</Typography>
-      <Typography></Typography>
-      <Box>
+    <Box
+      width="75%"
+      height="min-content"
+      sx={{
+        padding: 2,
+        borderRadius: 5,
+        margin: 3,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "space-between",
+        bgcolor: "#002360ff",
+        color: "#aee0ffff",
+      }}
+    >
+      <Typography variant="h4" sx={{ padding: 2 }}>
+        Képek konvertálása
+      </Typography>
+      <Typography>
+        Abban az esetben, ha nem jpg formátumban vannak a képeid , akkor ide
+        tudod feltölteni a png vagy jpeg formátumú képeket. Majd ha beküldöd a
+        képeket, ez a rész konvertálja őket a megfelelő formátumban és menti
+        őket egy mappába.
+      </Typography>
+      <Box sx={{ padding: 2, margin: 2 }}>
         <ImageUploading
           multiple
           value={images}
@@ -57,53 +78,72 @@ const ImageAnalysis = () => {
           acceptType={["png", "jpeg", "bmp"]}
         >
           {({ imageList, onImageUpload, onImageRemove }) => (
-            <Box sx={{ display: "flex", flexDirection: "row" }}>
-              <Tooltip title="Kép feltöltése">
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={onImageUpload}
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                flexWrap: "wrap",
+              }}
+            >
+              <Box>
+                <Tooltip
+                  title="Kép feltöltése"
+                  sx={{ margin: 1, padding: 1, alignItems: "center" }}
                 >
-                  <AddPohotoAlternate />
-                </Button>
-              </Tooltip>
-              {imageList.map((image, index) => (
-                <div key={index} className="imageItem">
-                  <Box sx={{ margin: 1, padding: 1 }}>
-                    <img src={image["data_url"]} alt="image" width="100" />
-                  </Box>
-                  <div>
-                    <Tooltip title="Feltöltött képek eltávolítása">
-                      <Button
-                        sx={{ marginRight: 1 }}
-                        variant="contained"
-                        color="error"
-                        onClick={() => onImageRemove(index)}
-                      >
-                        <HideImage />
-                      </Button>
-                    </Tooltip>
-                    &nbsp;
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={onImageUpload}
+                  >
+                    <AddPohotoAlternate />
+                  </Button>
+                </Tooltip>
+                <Tooltip
+                  title="Feltöltött kép elemzése"
+                  sx={{ margin: 1, padding: 1, alignItems: "center" }}
+                >
+                  <Button
+                    variant="contained"
+                    color="success"
+                    onClick={() => {
+                      handleOnChange(images);
+                    }}
+                    disabled={imageList.length === 0}
+                  >
+                    <FileUploadIcon />
+                  </Button>
+                </Tooltip>
+              </Box>
+              <Box
+                sx={{ display: "flex", flexDirection: "row", flexWrap: "wrap" }}
+              >
+                {imageList.map((image, index) => (
+                  <div key={index} className="imageItem">
+                    <Box sx={{ margin: 1, padding: 1 }}>
+                      <img src={image["data_url"]} alt="image" width="100" />
+                    </Box>
+                    <div>
+                      <Tooltip title="Feltöltött képek eltávolítása">
+                        <Button
+                          sx={{ marginRight: 1 }}
+                          variant="contained"
+                          color="error"
+                          onClick={() => onImageRemove(index)}
+                        >
+                          <HideImage />
+                        </Button>
+                      </Tooltip>
+                      &nbsp;
+                    </div>
                   </div>
-                </div>
-              ))}
-              <Tooltip title="Feltöltött kép elemzése">
-                <Button
-                  sx={{ marginRight: 1, padding: 1 }}
-                  variant="contained"
-                  color="success"
-                  onClick={() => {
-                    handleOnChange(images);
-                  }}
-                >
-                  <FileUploadIcon />
-                </Button>
-              </Tooltip>
+                ))}
+              </Box>
             </Box>
           )}
         </ImageUploading>
       </Box>
-    </>
+    </Box>
   );
 };
 

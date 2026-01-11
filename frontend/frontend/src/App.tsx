@@ -6,7 +6,7 @@ import ImageConverter from "./components/ImageConverter";
 import UserModel from "./components/UserModel";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
-import Model1 from "./components/Model1";
+import CompareModel from "./components/CompareModel";
 
 function App() {
   return (
@@ -24,7 +24,7 @@ function App() {
       <Header />
       <Introduction />
       <ImageAnalysis />
-      <Model1 />
+      <CompareModel />
       <ImageConverter />
       <UserModel />
       <Footer />

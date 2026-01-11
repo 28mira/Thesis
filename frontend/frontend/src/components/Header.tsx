@@ -9,10 +9,10 @@ const Header = () => {
       alignItems="center"
       justifyContent="center"
       width="100%"
-      bgcolor="#08439cff"
+      bgcolor="#002360ff"
       color="#f0f0e1ff"
     >
-      <Typography sx={{ textAlign: "left",  marginLeft: 2 }}>
+      <Typography sx={{ textAlign: "left", marginLeft: 2 }}>
         <MonitorHeart />
       </Typography>
     </Box>

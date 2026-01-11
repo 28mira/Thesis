@@ -1,8 +1,14 @@
 import { useState, useEffect } from "react";
 import { Typography, Stack, Box } from "@mui/material";
 import { RadarChart } from "@mui/x-charts/RadarChart";
+import { useTheme } from "@mui/material/styles";
 
 const CompareModel = () => {
+  const theme = useTheme();
+  const stripeColor = (index: number) => {
+    return "#002360ff";
+  };
+
   const [modelData, setModelData] = useState({
     accuracy: null,
     loss: null,
@@ -32,17 +38,22 @@ const CompareModel = () => {
 
   return (
     <Box
-      flexDirection="row"
-      alignItems="flex-start"
-      justifyContent="center"
-      textAlign="left"
-      width="75%"
-      height="min-content"
-      bgcolor="#ffffffff"
-      padding={2}
-      marginTop={3}
-      display={{ xs: "block", md: "flex" }}
+      sx={{
+        flexDirection: "column",
+        textAlign: "left",
+        height: "min-content",
+        backgroundColor: "#aee0ffff",
+        color: "#002360ff",
+        padding: 1,
+        margin: 1,
+        display: { xs: "block", md: "flex" },
+        borderRadius: 10,
+        border: "1.5px solid #002360ff",
+      }}
     >
+      <Typography variant="h4" sx={{ padding: 2 }}>
+        A modellről:
+      </Typography>
       <Typography variant="body1">
         A képfeldolgozást egy úgynevezett CNN (Convolutional Neural Network)
         kettő mélységű hálóval készítettem el. Mivel ez könnyen tanítható kisebb
@@ -53,34 +64,37 @@ const CompareModel = () => {
         fel, ez azt jelenti hogy fekete fehérek a képek, és 3 fajta elváltozásra
         tudja szétbontani a képeket.
       </Typography>
-      <RadarChart
-        height={300}
-        width={300}
-        colors={["#c42020ff"]}
-        series={[
-          {
-            label: "Ditaiails",
-            data: [
-              Number(modelData.accuracy),
-              Number(modelData.loss),
-              Number(modelData.val_loss),
-              Number(modelData.precision),
-              Number(modelData.recall),
-              Number(modelData.f1_score),
+      <Box sx={{ padding: 2 }}>
+        <RadarChart
+          stripeColor={stripeColor}
+          height={300}
+          width={300}
+          colors={["#7e0000ff"]}
+          series={[
+            {
+              label: "Ditaiails",
+              data: [
+                Number(modelData.accuracy),
+                Number(modelData.loss),
+                Number(modelData.val_loss),
+                Number(modelData.precision),
+                Number(modelData.recall),
+                Number(modelData.f1_score),
+              ],
+            },
+          ]}
+          radar={{
+            metrics: [
+              { name: "Accuracy", max: 1, min: 0.3 },
+              { name: "Avg Loss", max: 0.0, min: 1.0 },
+              { name: "Avg Val Loss", max: 0.0, min: 1.0 },
+              { name: "Precision", max: 1, min: 0.3 },
+              { name: "Recall", max: 1, min: 0.3 },
+              { name: "F1 Score", max: 1, min: 0.3 },
             ],
-          },
-        ]}
-        radar={{
-          metrics: [
-            { name: "Accuracy", max: 1, min: 0.3 },
-            { name: "Avg Loss", max: 0.0, min: 1.0 },
-            { name: "Avg Val Loss", max: 0.0, min: 1.0 },
-            { name: "Precision", max: 1, min: 0.3 },
-            { name: "Recall", max: 1, min: 0.3 },
-            { name: "F1 Score", max: 1, min: 0.3 },
-          ],
-        }}
-      />
+          }}
+        />
+      </Box>
     </Box>
   );
 };
