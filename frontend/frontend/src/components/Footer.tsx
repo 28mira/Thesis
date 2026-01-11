@@ -9,8 +9,10 @@ const Header = () => {
       alignItems="center"
       justifyContent="center"
       width="100%"
-      bgcolor="#08439cff"
-      color="#f0f0e1ff"
+      bgcolor="#002060ff"
+      color="#aee0ffff"
+      padding={2}
+      margin={1}
       marginTop={3}
     >
       <Typography>

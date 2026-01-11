@@ -33,6 +33,7 @@ WEBLINKS = {
 y_test = np.load('brainTumor_y_test.npy',allow_pickle=True)
 X_test = np.load('brainTumor_X_test.npy',allow_pickle=True)
 
+userModel = None
 
 brainTumorModel = load_model('models/BrainTumorClassificationModel.h5')
 brainTumorHistory = jl.load('models/BrainTumorClassificationHistory.pkl')
@@ -158,7 +159,6 @@ def user_model():
     for get in files:
         img_size = (256,256)
         img = Image.open(get.stream).convert('L').resize(img_size)
-
         img = img_to_array(img)
         img = img / 255.0  
         img = np.expand_dims(img,axis=0)
@@ -166,8 +166,11 @@ def user_model():
         y.append(0) 
     epochs = int(request.form.get("epochs"))
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
+
     model = LogisticRegression(max_iter=epochs)
     model.fit(np.array(X_train).reshape(len(X_train), -1), y_train)
+
+    userModel = model
     return jsonify({'message': f'Sikeresen megkaptuk a fájlokat és az epoch számot: {len(files)} fájl és {epochs} epoch.'})
 
 @app.route('/imageAnalyze/result', methods=['GET'])

@@ -10,6 +10,7 @@ import { Typography } from "@mui/material";
 
 const UserModel = () => {
   const [images, setImages] = React.useState<any[]>([]);
+  const [imageListLenght, setImageListLength] = React.useState(0);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -45,6 +46,7 @@ const UserModel = () => {
       return;
     } else {
       setImages(imageList);
+      setImageListLength(imageList.length);
     }
   };
   return (
@@ -100,7 +102,9 @@ const UserModel = () => {
             </Box>
           )}
         </ImageUploading>
-        <Button type="submit">Tanítás</Button>
+        <Button type="submit" disabled={imageListLenght === 0}>
+          Tanítás
+        </Button>
       </form>
     </>
   );
