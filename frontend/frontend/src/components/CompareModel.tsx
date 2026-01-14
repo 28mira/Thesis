@@ -36,16 +36,14 @@ const CompareModel = () => {
 
   return (
     <Box
-      flexDirection="row"
-      alignItems="center"
-      justifyContent="center"
       textAlign="center"
-      width="75%"
       height="min-content"
       bgcolor="#7e0000ff"
       padding={2}
-      marginTop={3}
+      margin={1}
       borderRadius={10}
+      maxHeight={700}
+      minHeight={700}
       border="1.5px solid #7e0000ff"
       color={"#aee0ffff"}
     >
@@ -71,6 +69,7 @@ const CompareModel = () => {
           loading={false}
           highlight="axis"
           height={300}
+          width={300}
           colors={["#002360ff"]}
           shape="circular"
           series={[

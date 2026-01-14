@@ -5,12 +5,14 @@ import { Typography } from "@mui/material";
 const Header = () => {
   return (
     <Box
-      flexDirection="row"
-      alignItems="center"
-      justifyContent="center"
-      width="100%"
-      bgcolor="#002360ff"
-      color="#f0f0e1ff"
+      sx={{
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        width: "100%",
+        bgcolor: "#002360ff",
+        color: "#f0f0e1ff",
+      }}
     >
       <Typography sx={{ textAlign: "left", marginLeft: 2 }}>
         <MonitorHeart />

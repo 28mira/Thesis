@@ -5,15 +5,16 @@ import { Typography } from "@mui/material";
 const Header = () => {
   return (
     <Box
-      flexDirection="row"
-      alignItems="center"
-      justifyContent="center"
-      width="100%"
-      bgcolor="#002060ff"
-      color="#aee0ffff"
-      padding={2}
-      margin={1}
-      marginTop={3}
+      sx={{
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        width: "100%",
+        bgcolor: "#002060ff",
+        color: "#aee0ffff",
+        padding: 2,
+        marginTop: 3,
+      }}
     >
       <Typography>
         <Mail /> martonmira02@gmail.com

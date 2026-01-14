@@ -80,7 +80,8 @@ def upload_file():
     img_size = (256,256)
 
     get = request.files['image']
-    img = Image.open(get.stream).convert('L').resize(img_size)
+    img = Image.open(get.stream).convert('RGB')
+    img = img.convert('L').resize(img_size)
 
     img = img_to_array(img)
     img = img / 255.0  
@@ -125,17 +126,6 @@ def upload_file():
                     'accuracy': pred_prob,
                     'result_image': f'http://localhost:5000/image/result.jpg' if pred_class == 0 or pred_class == 1 or pred_class == 2 else None
                     })
-
-
-@app.route('/api/convert', methods=['POST'])
-def convert_images():
-    if os.path.exists('output_images'):
-        shutil.rmtree('output_images')
-    os.makedirs('output_images', exist_ok=True)
-    for file in request.files.getlist('images'):
-        img = Image.open(file.stream).convert('RGB')
-        img.save('output_images/' + os.path.splitext(file.filename)[0] + '.jpg', "JPEG")
-    return jsonify({'message': 'A képek sikeresen konvertálva lettek.'})
 
 @app.route('/api/userModel', methods=['POST'])
 def user_model():

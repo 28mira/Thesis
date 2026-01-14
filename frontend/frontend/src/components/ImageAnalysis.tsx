@@ -82,86 +82,90 @@ const ImageAnalysis = () => {
           margin: 2,
           width: "75%",
           textAlign: "left",
-          flexDirection: "column",
+          flexDirection: "row",
           display: { xs: "block", md: "flex" },
         }}
       >
-        <Typography variant="h3">Képelemzés</Typography>
-        <Typography variant="body1" sx={{ marginTop: 2, marginBottom: 2 }}>
-          Mestereséges intelligencia segítségével elemzésre kerül az ide
-          feltöltött kép, ami 6 féle diagnózist adhat vissza. A modell 3 féle
-          elváltozást ismer fel ezek a meningeóma, a glióma és az agyalapi
-          mirigy daganat, ezeken kívül lehet más fajta elváltozás is és teljesen
-          egészséges kép az agyról.
-        </Typography>
-
-        <div className="imageUpload" style={{ textAlign: "center" }}>
-          <ImageUploading
-            value={image}
-            onChange={onChange}
-            dataURLKey="data_url"
-            acceptType={["jpg"]}
-          >
-            {({ imageList, onImageUpload, onImageRemove }) => (
-              <div>
-                <Tooltip title="Kép feltöltése">
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={onImageUpload}
-                  >
-                    <AddPohotoAlternate />
-                  </Button>
-                </Tooltip>
-                {imageList.map((image, index) => (
-                  <div key={index} className="imageItem">
-                    <Box sx={{ margin: 1 }}>
-                      <img
-                        src={image["data_url"]}
-                        alt="image"
-                        width="100"
-                        style={{ borderRadius: "15px" }}
-                      />
-                    </Box>
-                    <div>
-                      <Tooltip title="Feltöltött kép eltávolítása">
-                        <Button
-                          sx={{ marginRight: 1 }}
-                          variant="contained"
-                          color="error"
-                          onClick={() => onImageRemove(index)}
-                        >
-                          <HideImage />
-                        </Button>
-                      </Tooltip>
-                      &nbsp;
-                      <Tooltip title="Feltöltött kép elemzése">
-                        <Button
-                          sx={{ marginRight: 1 }}
-                          variant="contained"
-                          color="success"
-                          onClick={() => {
-                            handleOnChange(image).then((type) => {
-                              const a = type.split(",")[0];
-                              const l = type.split(",")[1];
-                              const result_image = type.split(",")[2];
-                              setTumorType(Number(a));
-                              setAccuracy(Number(l));
-                              setResultImage(result_image);
-                            });
-                            setShowDetails(true);
-                          }}
-                        >
-                          <FileUploadIcon />
-                        </Button>
-                      </Tooltip>
+        <Box sx={{ flex: 1 }}>
+          <Typography variant="h3">Képelemzés</Typography>
+          <Typography variant="body1" sx={{ marginTop: 2, marginBottom: 2 }}>
+            Mestereséges intelligencia segítségével elemzésre kerül az ide
+            feltöltött kép, ami 6 féle diagnózist adhat vissza. A modell 3 féle
+            elváltozást ismer fel ezek a meningeóma, a glióma és az agyalapi
+            mirigy daganat, ezeken kívül lehet más fajta elváltozás is és
+            teljesen egészséges kép az agyról.
+          </Typography>
+        </Box>
+        <Box sx={{ flex: 1, height: "max-content" }}>
+          <div className="imageUpload" style={{ textAlign: "center" }}>
+            <ImageUploading
+              value={image}
+              onChange={onChange}
+              dataURLKey="data_url"
+              acceptType={["jpg"]}
+            >
+              {({ imageList, onImageUpload, onImageRemove }) => (
+                <div>
+                  <Tooltip title="Kép feltöltése">
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={onImageUpload}
+                    >
+                      <AddPohotoAlternate />
+                    </Button>
+                  </Tooltip>
+                  {imageList.map((image, index) => (
+                    <div key={index} className="imageItem">
+                      <Box sx={{ margin: 1 }}>
+                        <img
+                          src={image["data_url"]}
+                          alt="image"
+                          height="120"
+                          width="auto"
+                          style={{ borderRadius: "15px" }}
+                        />
+                      </Box>
+                      <div>
+                        <Tooltip title="Feltöltött kép eltávolítása">
+                          <Button
+                            sx={{ marginRight: 1 }}
+                            variant="contained"
+                            color="error"
+                            onClick={() => onImageRemove(index)}
+                          >
+                            <HideImage />
+                          </Button>
+                        </Tooltip>
+                        &nbsp;
+                        <Tooltip title="Feltöltött kép elemzése">
+                          <Button
+                            sx={{ marginRight: 1 }}
+                            variant="contained"
+                            color="success"
+                            onClick={() => {
+                              handleOnChange(image).then((type) => {
+                                const a = type.split(",")[0];
+                                const l = type.split(",")[1];
+                                const result_image = type.split(",")[2];
+                                setTumorType(Number(a));
+                                setAccuracy(Number(l));
+                                setResultImage(result_image);
+                              });
+                              setShowDetails(true);
+                            }}
+                          >
+                            <FileUploadIcon />
+                          </Button>
+                        </Tooltip>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </ImageUploading>
-        </div>
+                  ))}
+                </div>
+              )}
+            </ImageUploading>
+          </div>
+        </Box>
       </Box>
       <Box
         sx={{
@@ -218,15 +222,6 @@ const ImageAnalysis = () => {
             </Box>
           </Box>
         )}
-        <Box
-          sx={{
-            flex: 1,
-            height: "min-content",
-            textAlign: "left",
-          }}
-        >
-          <Model1 />
-        </Box>
       </Box>
     </>
   );

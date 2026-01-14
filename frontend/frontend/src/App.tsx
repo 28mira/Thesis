@@ -2,11 +2,10 @@ import { useState, useEffect } from "react";
 import Introduction from "./components/Introduction";
 import Box from "@mui/material/Box";
 import ImageAnalysis from "./components/ImageAnalysis";
-import ImageConverter from "./components/ImageConverter";
 import UserModel from "./components/UserModel";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
-import CompareModel from "./components/CompareModel";
+import Model1 from "./components/Model1";
 
 function App() {
   return (
@@ -24,8 +23,7 @@ function App() {
       <Header />
       <Introduction />
       <ImageAnalysis />
-      <CompareModel />
-      <ImageConverter />
+      <Model1 />
       <UserModel />
       <Footer />
     </Box>
