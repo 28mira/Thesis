@@ -1,22 +1,50 @@
 import Box from "@mui/material/Box";
 import { MonitorHeart } from "@mui/icons-material";
 import { Typography } from "@mui/material";
+import Button from "@mui/material/Button";
+import { Link } from "react-router-dom";
 
 const Header = () => {
   return (
     <Box
       sx={{
+        display: "flex",
+        flex: 1,
         flexDirection: "row",
-        alignItems: "center",
+        textAlign: "right",
         justifyContent: "center",
+        backgroundColor: "#002360ff",
+        color: "#7e0000ff",
         width: "100%",
-        bgcolor: "#002360ff",
-        color: "#f0f0e1ff",
+        padding: 1,
       }}
     >
-      <Typography sx={{ textAlign: "left", marginLeft: 2 }}>
+      <Typography
+        sx={{
+          flex: 1,
+          textAlign: "left",
+          marginLeft: 2,
+          justifyContent: "center",
+        }}
+      >
         <MonitorHeart />
       </Typography>
+      <nav>
+        <Button
+          component={Link}
+          to="/"
+          style={{ color: "#546d8fff", fontWeight: "bold", borderRadius: 10 }}
+        >
+          Főoldal
+        </Button>
+        <Button
+          component={Link}
+          to="/UserModel"
+          style={{ color: "#546d8fff", fontWeight: "bold", borderRadius: 10 }}
+        >
+          Felhasználói modell
+        </Button>
+      </nav>
     </Box>
   );
 };

@@ -21,7 +21,7 @@ const Introduction = () => {
         fontWeight="400"
         fontStyle="normal"
       >
-        Agyi daganatok detektálása MRI képekről
+        A felhasználói modell tanítása
       </Typography>
     </Box>
   );

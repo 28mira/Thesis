@@ -6,7 +6,6 @@ import FileUploadIcon from "@mui/icons-material/FileUpload";
 import ImageUploading from "react-images-uploading";
 import AddPohotoAlternate from "@mui/icons-material/AddPhotoAlternate";
 import { HideImage } from "@mui/icons-material";
-import Model1 from "./Model1";
 import { useState } from "react";
 import { useEffect } from "react";
 import { Card, Typography } from "@mui/material";
