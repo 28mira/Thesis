@@ -14,7 +14,7 @@ from tensorflow.keras import preprocessing
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.image import img_to_array
 from sklearn.metrics import accuracy_score, classification_report
-from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from PIL import Image
 
@@ -129,39 +129,56 @@ def upload_file():
 
 @app.route('/api/userModel', methods=['POST'])
 def user_model():
-    input_folder = '/Normal_images'
-    db = 0
-    for file_name in sorted(os.listdir(input_folder)):
+    input_folder = 'Normal_images'
+    classes = 0
+    X = []
+    y = []
+    numtypes = int(request.form.get("numtypes"))
+    image_size = (128, 128)    
+    if os.path.exists(input_folder):
+        for file_name in sorted(os.listdir(input_folder)):
             if file_name.endswith('.jpg'):
                 file_path = os.path.join(input_folder,file_name)
                 
-                img = preprocessing.image.load_img(file_path,target_size=(256, 256),
+                img = preprocessing.image.load_img(file_path,target_size=image_size,
                                                     color_mode="grayscale")
                 image_array = preprocessing.image.img_to_array(img)
-                image_array = image_array/255.0
-                db+=1
+                image_array = image_array.flatten()/255.0
                 X.append(image_array)
-                y.append(1)
+                y.append(classes)
+        classes+=1
 
-    files = request.files.getlist("images")
-    X = []
-    y = []
-    for get in files:
-        img_size = (256,256)
-        img = Image.open(get.stream).convert('L').resize(img_size)
-        img = img_to_array(img)
-        img = img / 255.0  
-        img = np.expand_dims(img,axis=0)
-        X.append(img)
-        y.append(0) 
-    epochs = int(request.form.get("epochs"))
+    for i in range(numtypes):
+        images = request.files.getlist(f"type_{i}")
+        if len(images) != 0:
+            db = 0
+            for get in images:
+                if db >= 100: break
+                else:
+                    img = Image.open(get.stream).convert('L').resize(image_size)
+                    img = img_to_array(img)
+                    img = img.flatten() / 255.0  
+                    X.append(img)
+                    y.append(classes)
+                    db+=1
+            classes+=1 
+
+    X = np.array(X)
+    y = np.array(y)
+
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
 
-    model = LogisticRegression(max_iter=epochs)
-    model.fit(np.array(X_train).reshape(len(X_train), -1), y_train)
+    model = RandomForestClassifier(max_depth=20, n_estimators=100)
+    model.fit(X_train, y_train)
 
+    accuracy = model.score(X_test, y_test)
+    print(f"User model trained with accuracy: {accuracy}")
     userModel = model
-    return jsonify({'message': f'Sikeresen megkaptuk a fájlokat és az epoch számot: {len(files)} fájl és {epochs} epoch.'})
+    return jsonify({
+        "message": "Sikeres tanítás",
+        "num_classes": classes,
+        "num_samples": len(X),
+    })
 
 @app.route('/imageAnalyze/result', methods=['GET'])
 def image_analyze_result():

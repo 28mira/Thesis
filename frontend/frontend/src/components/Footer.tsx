@@ -6,14 +6,15 @@ const Header = () => {
   return (
     <Box
       sx={{
-        flexDirection: "row",
+        flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
         width: "100%",
         bgcolor: "#002060ff",
         color: "#aee0ffff",
         padding: 2,
-        marginTop: 3,
+        marginTop: 2,
+        display: "flex",
       }}
     >
       <Typography>
