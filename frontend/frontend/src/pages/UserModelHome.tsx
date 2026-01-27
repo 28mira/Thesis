@@ -20,7 +20,6 @@ const UserModelHome = () => {
       <Header />
       <UserModelIntro />
       <UserModel />
-      <Footer />
     </Box>
   );
 };

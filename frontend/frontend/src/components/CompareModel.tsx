@@ -36,22 +36,39 @@ const CompareModel = () => {
 
   return (
     <Box
-      textAlign="center"
+      textAlign="left"
       height="min-content"
       bgcolor="#7e0000ff"
       padding={2}
       margin={1}
       borderRadius={10}
-      maxHeight={700}
-      minHeight={700}
+      maxHeight={720}
+      minHeight={720}
       border="1.5px solid #7e0000ff"
       color={"#aee0ffff"}
     >
       <Box>
-        <Typography variant="h4" sx={{ padding: 2 }}>
+        <Typography
+          variant="h4"
+          sx={{
+            padding: 2,
+            fontFamily: "Meow Script Cursive",
+            fontWeight: "400",
+            fontStyle: "normal",
+          }}
+        >
           A kijelölő modell jellemzői:
         </Typography>
-        <Typography variant="body1" sx={{ padding: 2 }}>
+        <Typography
+          variant="body1"
+          sx={{
+            padding: 2,
+            fontFamily: "Meow Script Cursive",
+            fontWeight: "400",
+            fontStyle: "normal",
+            fontSize: 20,
+          }}
+        >
           Az alábbi grafikon a modell különböző metrikáit mutatja be. Minél
           közelebb vannak az értékek a külső körhöz, annál jobb a modell
           teljesítménye az adott metrikában.

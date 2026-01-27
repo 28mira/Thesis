@@ -48,7 +48,7 @@ const ImageAnalysis = () => {
 
   useEffect(() => {
     fetch(
-      `http://localhost:5000/imageAnalyze/result?type=${tumorType}&accuracy=${accuracy}`
+      `http://localhost:5000/imageAnalyze/result?type=${tumorType}&accuracy=${accuracy}`,
     )
       .then((response) => response.json())
       .then((data) => {
@@ -86,8 +86,27 @@ const ImageAnalysis = () => {
         }}
       >
         <Box sx={{ flex: 1 }}>
-          <Typography variant="h3">Képelemzés</Typography>
-          <Typography variant="body1" sx={{ marginTop: 2, marginBottom: 2 }}>
+          <Typography
+            variant="h3"
+            sx={{
+              fontFamily: "Meow Script Cursive",
+              fontWeight: "400",
+              fontStyle: "normal",
+            }}
+          >
+            Képelemzés
+          </Typography>
+          <Typography
+            variant="body1"
+            sx={{
+              marginTop: 2,
+              marginBottom: 2,
+              fontFamily: "Meow Script Cursive",
+              fontWeight: "400",
+              fontStyle: "normal",
+              fontSize: 20,
+            }}
+          >
             Mestereséges intelligencia segítségével elemzésre kerül az ide
             feltöltött kép, ami 6 féle diagnózist adhat vissza. A modell 3 féle
             elváltozást ismer fel ezek a meningeóma, a glióma és az agyalapi
@@ -188,23 +207,55 @@ const ImageAnalysis = () => {
             }}
           >
             <Box>
-              <Typography variant="h4" sx={{ padding: 2 }}>
+              <Typography
+                variant="h4"
+                sx={{
+                  padding: 2,
+                  fontFamily: "Meow Script Cursive",
+                  fontWeight: "400",
+                  fontStyle: "normal",
+                }}
+              >
                 {resultData.label}:
               </Typography>
-              <Typography sx={{ width: "90%", height: "90%" }}>
+              <Typography
+                sx={{
+                  width: "90%",
+                  height: "90%",
+                  fontFamily: "Meow Script Cursive",
+                  fontWeight: "400",
+                  fontStyle: "normal",
+                  fontSize: 20,
+                }}
+              >
                 {resultData.content}
               </Typography>
               <a
                 href={resultData.link}
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ color: "#002360ff" }}
+                style={{
+                  color: "#002360ff",
+                  fontFamily: "Meow Script Cursive",
+                  fontWeight: "400",
+                  fontStyle: "normal",
+                  fontSize: 20,
+                }}
               >
                 Ide kettintva tudsz tovább olvasni
               </a>
             </Box>
             <Box>
-              <Typography variant="h4" sx={{ padding: 2, color: "#aee0ffff" }}>
+              <Typography
+                variant="h4"
+                sx={{
+                  padding: 2,
+                  color: "#aee0ffff",
+                  fontFamily: "Meow Script Cursive",
+                  fontWeight: "400",
+                  fontStyle: "normal",
+                }}
+              >
                 Az elváltozás helye:
               </Typography>
               <img

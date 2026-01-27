@@ -5,9 +5,6 @@ const Introduction = () => {
   return (
     <Box
       flexDirection={"row"}
-      alignItems="center"
-      justifyContent="center"
-      textAlign="center"
       width="100%"
       bgcolor="#002360ff"
       color="#aee0ffff"

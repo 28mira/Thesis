@@ -12,7 +12,6 @@ const Header = () => {
         flex: 1,
         flexDirection: "row",
         textAlign: "right",
-        justifyContent: "center",
         backgroundColor: "#002360ff",
         color: "#7e0000ff",
         width: "100%",
@@ -24,7 +23,6 @@ const Header = () => {
           flex: 1,
           textAlign: "left",
           marginLeft: 2,
-          justifyContent: "center",
         }}
       >
         <MonitorHeart />
@@ -33,14 +31,28 @@ const Header = () => {
         <Button
           component={Link}
           to="/"
-          style={{ color: "#546d8fff", fontWeight: "bold", borderRadius: 10 }}
+          style={{
+            color: "#546d8fff",
+            fontWeight: "bold",
+            borderRadius: 10,
+            fontFamily: "Meow Script Cursive",
+            fontStyle: "normal",
+            fontSize: 16,
+          }}
         >
           Főoldal
         </Button>
         <Button
           component={Link}
           to="/UserModel"
-          style={{ color: "#546d8fff", fontWeight: "bold", borderRadius: 10 }}
+          style={{
+            color: "#546d8fff",
+            fontWeight: "bold",
+            borderRadius: 10,
+            fontFamily: "Meow Script Cursive",
+            fontStyle: "normal",
+            fontSize: 16,
+          }}
         >
           Felhasználói modell
         </Button>

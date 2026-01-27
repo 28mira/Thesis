@@ -34,6 +34,7 @@ y_test = np.load('brainTumor_y_test.npy',allow_pickle=True)
 X_test = np.load('brainTumor_X_test.npy',allow_pickle=True)
 
 userModel = None
+userLabels = []
 
 brainTumorModel = load_model('models/BrainTumorClassificationModel.h5')
 brainTumorHistory = jl.load('models/BrainTumorClassificationHistory.pkl')
@@ -129,6 +130,9 @@ def upload_file():
 
 @app.route('/api/userModel', methods=['POST'])
 def user_model():
+    global userModel
+    global userLabels
+    userLabels = ['egészséges']
     input_folder = 'Normal_images'
     classes = 0
     X = []
@@ -149,11 +153,15 @@ def user_model():
         classes+=1
 
     for i in range(numtypes):
+        label = request.form.get(f"label_{i}")
+        userLabels.append(label)
+
+    for i in range(numtypes):
         images = request.files.getlist(f"type_{i}")
         if len(images) != 0:
             db = 0
             for get in images:
-                if db >= 100: break
+                if db >= 30: break
                 else:
                     img = Image.open(get.stream).convert('L').resize(image_size)
                     img = img_to_array(img)
@@ -174,11 +182,42 @@ def user_model():
     accuracy = model.score(X_test, y_test)
     print(f"User model trained with accuracy: {accuracy}")
     userModel = model
+    print(classes)
     return jsonify({
-        "message": "Sikeres tanítás",
-        "num_classes": classes,
-        "num_samples": len(X),
+        "num_classes": classes
     })
+
+@app.route('/api/userupload',methods=['POST'])
+def UserModelImageAnalysis():
+    global userModel
+    global userLabels
+    img_size = (128,128)
+
+    get = request.files['image']
+    img = Image.open(get.stream)
+    img = img.convert('L').resize(img_size)
+
+    img = img_to_array(img)
+    img = img.flatten() / 255.0  
+    img = np.expand_dims(img,axis=0)
+
+    pred = userModel.predict_proba(img)
+    accuracy = float(np.max(pred))
+    print("Prediction: ",pred)
+    prediction = int(np.argmax(pred))
+    print(userLabels[prediction])
+    if accuracy > 0.5:
+        return jsonify({
+            "prediction": prediction,
+            "accuracy": accuracy,
+            "label": userLabels[prediction]
+        })
+    else:
+        return jsonify({
+            "prediction": 0,
+            "accuracy": 0,
+            "label": 'Nem biztos'
+        })
 
 @app.route('/imageAnalyze/result', methods=['GET'])
 def image_analyze_result():

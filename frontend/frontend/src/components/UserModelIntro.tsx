@@ -5,18 +5,16 @@ const Introduction = () => {
   return (
     <Box
       flexDirection={"row"}
-      alignItems="center"
-      justifyContent="center"
-      textAlign="center"
+      textAlign="left"
       width="100%"
       bgcolor="#002360ff"
       color="#aee0ffff"
       padding={2}
       display={"flex"}
+      marginBottom={2}
     >
       <Typography
         variant="h2"
-        textAlign={"left"}
         fontFamily="Meow Script Cursive"
         fontWeight="400"
         fontStyle="normal"

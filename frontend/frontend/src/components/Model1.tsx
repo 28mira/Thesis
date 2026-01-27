@@ -52,18 +52,34 @@ const Model1 = () => {
           height: "min-content",
           backgroundColor: "#aee0ffff",
           color: "#002360ff",
-          maxHeight: 700,
-          minHeight: 700,
+          maxHeight: 720,
+          minHeight: 720,
           padding: 1,
           margin: 1,
           borderRadius: 10,
           border: "1.5px solid #002360ff",
         }}
       >
-        <Typography variant="h4" sx={{ padding: 2 }}>
+        <Typography
+          variant="h4"
+          sx={{
+            padding: 2,
+            fontFamily: "Meow Script Cursive",
+            fontWeight: "bold",
+            fontStyle: "normal",
+          }}
+        >
           A modellről:
         </Typography>
-        <Typography variant="body1">
+        <Typography
+          variant="body1"
+          style={{
+            fontFamily: "Meow Script Cursive",
+            fontWeight: "400",
+            fontStyle: "normal",
+            fontSize: 20,
+          }}
+        >
           A képfeldolgozást egy úgynevezett CNN (Convolutional Neural Network)
           kettő mélységű hálóval készítettem el. Mivel ez könnyen tanítható
           kisebb adatmennyiségeken és a futási ideje sem nagyon hosszú. Azért
