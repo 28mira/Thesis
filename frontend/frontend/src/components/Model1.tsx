@@ -74,6 +74,7 @@ const Model1 = () => {
         <Typography
           variant="body1"
           style={{
+            padding: 2,
             fontFamily: "Meow Script Cursive",
             fontWeight: "400",
             fontStyle: "normal",
@@ -87,7 +88,7 @@ const Model1 = () => {
           problémák a túltanulással, mivel nem áll rendelkezésemre sok adat. Még
           érdemes tudni a modellről, hogy a képeket 256x256-os méretben 1
           csatornán dolgozza fel, ez azt jelenti hogy fekete fehérek a képek, és
-          3 fajta elváltozásra tudja szétbontani a képeket.
+          6 féle elváltozásra tudja szétbontani a képeket.
         </Typography>
         <Box sx={{ padding: 2 }}>
           <RadarChart

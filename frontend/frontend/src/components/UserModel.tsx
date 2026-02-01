@@ -1,7 +1,7 @@
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Tooltip from "@mui/material/Tooltip";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Footer from "../components/Footer";
 import AnalysisUserModel from "../components/AnalysisUserModel";
 import ImageUploading from "react-images-uploading";
@@ -9,13 +9,90 @@ import AddPohotoAlternate from "@mui/icons-material/AddPhotoAlternate";
 import { HideImage } from "@mui/icons-material";
 import { Typography } from "@mui/material";
 
+const storageTime = 60 * 1000 * 30;
+
+function setLocalStorageWithExpiry(key: string, value: any) {
+  const item = {
+    value,
+    expiry: Date.now() + storageTime,
+  };
+  localStorage.setItem(key, JSON.stringify(item));
+}
+
+function getLocalStorageWithExpiry(key: string) {
+  const item = localStorage.getItem(key);
+  if (!item) return null;
+
+  try {
+    const olditem = JSON.parse(item);
+    if (Date.now() > olditem.expiry) {
+      localStorage.removeItem(key);
+      return null;
+    }
+    return olditem.value;
+  } catch {
+    return null;
+  }
+}
+
 const UserModel = () => {
-  const [numberOfTypes, setNumberOfTypes] = useState(5);
-  const [imagesByType, setImagesByType] = useState<any[][]>([]);
-  const [images, setImages] = React.useState<any[]>([]);
-  const [imageListLenght, setImageListLength] = React.useState(0);
-  const [showDetails, setShowDetails] = useState(false);
-  const [showModel, setShowModel] = useState(false);
+  const [numberOfTypes, setNumberOfTypes] = useState<number>(() => {
+    const saved = getLocalStorageWithExpiry("numberOfTypes");
+    return saved ? Number(saved) : 0;
+  });
+
+  const [imagesByType, setImagesByType] = useState<any[][]>(() => {
+    try {
+      const saved = getLocalStorageWithExpiry("imagesByType");
+      if (!saved || saved === "undefined") return [];
+      return JSON.parse(saved);
+    } catch {
+      return [];
+    }
+  });
+
+  const [labelNames, setLabelNames] = useState<string[]>(() => {
+    try {
+      const saved = getLocalStorageWithExpiry("labelNames");
+      if (!saved || saved === "undefined") return [];
+      return JSON.parse(saved);
+    } catch {
+      return [];
+    }
+  });
+
+  const [showDetails, setShowDetails] = useState(() => {
+    const saved = getLocalStorageWithExpiry("showDetails");
+    if (!saved || saved === "undefined") return false;
+    return imagesByType.length > 0;
+  });
+  const [showModel, setShowModel] = useState(() => {
+    const saved = getLocalStorageWithExpiry("showModel");
+    return saved ? JSON.parse(saved) : false;
+  });
+
+  useEffect(() => {
+    setLocalStorageWithExpiry("numberOfTypes", numberOfTypes);
+  }, [numberOfTypes]);
+
+  useEffect(() => {
+    const imagesData = imagesByType.map((list) =>
+      list.map((img: any) => ({ data_url: img.data_url })),
+    );
+    setLocalStorageWithExpiry("imagesByType", imagesData);
+  }, [imagesByType]);
+
+  useEffect(() => {
+    setLocalStorageWithExpiry("labelNames", labelNames);
+  }, [labelNames]);
+
+  useEffect(() => {
+    setLocalStorageWithExpiry("showDetails", showDetails);
+  }, [showDetails]);
+
+  useEffect(() => {
+    setLocalStorageWithExpiry("showModel", showModel);
+  }, [showModel]);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -100,6 +177,7 @@ const UserModel = () => {
           </Typography>
           <input
             type="number"
+            value={numberOfTypes || ""}
             name="numtyp"
             id="numtyp"
             width={5}
@@ -114,6 +192,12 @@ const UserModel = () => {
               setNumberOfTypes(numtype);
               setShowDetails(true);
               setImagesByType(Array.from({ length: numtype }, () => []));
+              setLabelNames(Array.from({ length: numtype }, () => ""));
+              /*setImagesByType(
+                Array.from({ length: numtype }, (_, i) => imagesByType[i] || [])
+              );
+              setLabelNames(Array.from({ length: numtype }, (_, i) => labelNames[i] || ""));
+              */
             }}
           />
         </Box>
@@ -156,6 +240,21 @@ const UserModel = () => {
                           <AddPohotoAlternate />
                         </Button>
                       </Tooltip>
+                      <input
+                        type="text"
+                        value={labelNames[index] ?? ""}
+                        onChange={(e) => {
+                          const newLabels = [...labelNames];
+                          newLabels[index] = e.target.value;
+                          setLabelNames(newLabels);
+                        }}
+                        style={{
+                          marginLeft: 10,
+                          height: 34,
+                          borderRadius: 6,
+                          paddingLeft: 8,
+                        }}
+                      />
                       <Box
                         sx={{
                           display: "flex",

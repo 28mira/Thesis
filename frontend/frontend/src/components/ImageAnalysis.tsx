@@ -36,6 +36,8 @@ async function handleOnChange(image: any) {
 const ImageAnalysis = () => {
   const [image, setImage] = React.useState([]);
   const [showDetails, setShowDetails] = useState(false);
+  const [dontShowImage, setDontShowImage] = useState(false);
+  const [dontShowLink, setDontShowLink] = useState(false);
   const [tumorType, setTumorType] = useState(0);
   const [accuracy, setAccuracy] = useState(0.0);
   const [resultImage, setResultImage] = useState("");
@@ -58,6 +60,8 @@ const ImageAnalysis = () => {
           accuracy: data.accuracy,
           link: data.link,
         });
+        if (data.label >= 3) setDontShowImage(true);
+        if (data.label !== 3) setDontShowLink(true);
       })
       .catch((error) => console.error("Error fetching message:", error));
   }, [tumorType]);
@@ -230,46 +234,50 @@ const ImageAnalysis = () => {
               >
                 {resultData.content}
               </Typography>
-              <a
-                href={resultData.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  color: "#002360ff",
-                  fontFamily: "Meow Script Cursive",
-                  fontWeight: "400",
-                  fontStyle: "normal",
-                  fontSize: 20,
-                }}
-              >
-                Ide kettintva tudsz tovább olvasni
-              </a>
+              {dontShowLink && (
+                <a
+                  href={resultData.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    color: "#002360ff",
+                    fontFamily: "Meow Script Cursive",
+                    fontWeight: "400",
+                    fontStyle: "normal",
+                    fontSize: 20,
+                  }}
+                >
+                  Ide kettintva tudsz tovább olvasni
+                </a>
+              )}
             </Box>
-            <Box>
-              <Typography
-                variant="h4"
-                sx={{
-                  padding: 2,
-                  color: "#aee0ffff",
-                  fontFamily: "Meow Script Cursive",
-                  fontWeight: "400",
-                  fontStyle: "normal",
-                }}
-              >
-                Az elváltozás helye:
-              </Typography>
-              <img
-                src={resultImage}
-                alt="Place of the tumor"
-                style={{
-                  width: "100%",
-                  height: "80%",
-                  objectFit: "contain",
-                  padding: "5px",
-                  borderRadius: "30px",
-                }}
-              />
-            </Box>
+            {dontShowImage && (
+              <Box>
+                <Typography
+                  variant="h4"
+                  sx={{
+                    padding: 2,
+                    color: "#aee0ffff",
+                    fontFamily: "Meow Script Cursive",
+                    fontWeight: "400",
+                    fontStyle: "normal",
+                  }}
+                >
+                  Az elváltozás helye:
+                </Typography>
+                <img
+                  src={resultImage}
+                  alt="Place of the tumor"
+                  style={{
+                    width: "100%",
+                    height: "80%",
+                    objectFit: "contain",
+                    padding: "5px",
+                    borderRadius: "30px",
+                  }}
+                />
+              </Box>
+            )}
           </Box>
         )}
       </Box>

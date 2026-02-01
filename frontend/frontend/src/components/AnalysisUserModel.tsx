@@ -87,7 +87,7 @@ const ImageAnalysis = () => {
             Sikeres volt a modell tanítása a megadott képek alapján. Alább tudod
             kiprobálni.
           </Typography>
-        </Box> 
+        </Box>
         <Box sx={{ flex: 1, height: "max-content" }}>
           <div className="imageUpload" style={{ textAlign: "center" }}>
             <ImageUploading

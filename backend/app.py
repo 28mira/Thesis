@@ -26,8 +26,8 @@ WEBLINKS = {
         1: 'glioma/glioma.html',
         2: 'amd/amd.html',
         3: '',
-        4: '',  #https://gyogyaszportal.hu/agyverzes/
-        5: ''   #https://egeszsegvonal.gov.hu/egeszseg-a-z/a-a/agyi-infarktus.html
+        4: 'agyverzes/agyverzes.html',  #https://gyogyaszportal.hu/agyverzes/
+        5: 'agyinfarktus/AgyiInfarktus.html'   #https://egeszsegvonal.gov.hu/egeszseg-a-z/a-a/agyi-infarktus.html
     }
 
 y_test = np.load('brainTumor_y_test.npy',allow_pickle=True)
@@ -54,10 +54,6 @@ def model_classification_report(model, X, y):
 @app.route('/model1/prediction')
 def model1_prediction():
     return jsonify({'message': prediction(brainTumorModel,X_test).tolist()})
-
-
-def confusion_matrix():
-    return 'Not doen yet.'
 
 @app.route('/model1/summary')
 def summary():
@@ -214,7 +210,7 @@ def UserModelImageAnalysis():
         })
     else:
         return jsonify({
-            "prediction": 0,
+            "prediction": -1,
             "accuracy": 0,
             "label": 'Nem biztos'
         })
@@ -295,7 +291,8 @@ def image_analyze_result():
     else:
         result = {
             "label": 'Valami más',
-            "content": "Valami más típusú elváltozás lehet.",
+            "content": "Valami más típusú elváltozás lehet. Ajánlott olrvoshoz fordulni a problémával.",
+            "link": "",
             "accuracy": accuracy,
         }
 
