@@ -7,7 +7,7 @@ import tensorflow as tf
 import matplotlib
 import matplotlib.pyplot as plt
 import os
-import shutil
+import cv2
 import torch
 from monai.networks.nets import UNet
 from tensorflow.keras import preprocessing
@@ -106,23 +106,36 @@ def upload_file():
         output = model(image)
         preds = torch.sigmoid(output)
         binary_preds = (preds>0.5).float()
+
+        pic = img
+        bin = (binary_preds.detach().cpu().numpy()[0,0]>0.5)
+        rgb = cv2.cvtColor((pic[0,:,:,0]*255).astype(np.uint8), cv2.COLOR_GRAY2BGR)
+        bin_color = np.zeros_like(rgb)
+        bin_color[bin] = [0,255,255]
+        blended = cv2.addWeighted(rgb,1.0,bin_color,0.4,0)
+
         matplotlib.use('Agg')
         plt.figure(figsize=(12, 8))
-        plt.imshow(binary_preds[0][0].cpu(), cmap='Reds')
-        plt.imshow(img[0][:,:,0], cmap='gray', alpha=0.5)
+        plt.imshow(blended)
         plt.axis('off')
         result_path = os.path.join(static_dir, 'result.jpg')
 
         plt.savefig(result_path, bbox_inches='tight', pad_inches=0)
 
     
-
     print(f"Predicted class: {pred_class}, Probability: {pred_prob}")
-    return jsonify({'message': 'Image received successfully', 
-                    'prediction': pred_class,
-                    'accuracy': pred_prob,
-                    'result_image': f'http://localhost:5000/image/result.jpg' if pred_class == 0 or pred_class == 1 or pred_class == 2 else None
-                    })
+    if (pred_prob>=0.75):
+        return jsonify({'message': 'Image received successfully', 
+                        'prediction': pred_class,
+                        'accuracy': pred_prob,
+                        'result_image': f'http://localhost:5000/image/result.jpg' if pred_class <= 2 else None
+                        })
+    else:
+        return jsonify({'message': 'Image received successfully', 
+                        'prediction': 10,
+                        'accuracy': pred_prob,
+                        'result_image': None
+                        })
 
 @app.route('/api/userModel', methods=['POST'])
 def user_model():
@@ -201,8 +214,9 @@ def UserModelImageAnalysis():
     accuracy = float(np.max(pred))
     print("Prediction: ",pred)
     prediction = int(np.argmax(pred))
-    print(userLabels[prediction])
-    if accuracy > 0.5:
+    print('User labels:',userLabels[prediction])
+    print('Accuracy',accuracy)
+    if accuracy >= 0.70:
         return jsonify({
             "prediction": prediction,
             "accuracy": accuracy,
@@ -210,7 +224,7 @@ def UserModelImageAnalysis():
         })
     else:
         return jsonify({
-            "prediction": -1,
+            "prediction": 10,
             "accuracy": 0,
             "label": 'Nem biztos'
         })
@@ -225,73 +239,69 @@ def image_analyze_result():
     if tumor_type == 0:
         result = {
             "label": 'Meningeóma',
-            "content": "Olyan típusú elváltozás ahol a tumor az "
-            "agy mellett található, lassan befelé nőnek. "
-            "Általában jóindulatúak, viszont ha túl nagyra nőnek "
-            "akkor életveszélyesek is lehetnek. Főbb tünetei a "
-            "fejfájás, a kéz és láb gyengesége, ezenkívül más "
-            "tünetei is lehetnek. ",
+            "content": '''Olyan típusú elváltozás, amelynél a daganat az agy felszínéhez közel helyezkedik el, és lassan növekszik befelé.
+                        Általában jóindulatú, azonban nagyobb méret elérése esetén életveszélyessé válhat.
+                        Leggyakoribb tünetei közé tartozik a fejfájás, valamint a kéz és a láb gyengesége, de az elhelyezkedéstől 
+                        függően egyéb neurológiai tünetek is jelentkezhetnek.''',
             "link": f"http://localhost:5000/pages/{WEBLINKS[tumor_type]}", #"https://orvos24.com/meningioma-tunetek-okok-kezelesek'>https://orvos24.com/meningioma-tunetek-okok-kezelesek",
             "accuracy": accuracy,
         }
     elif tumor_type == 1:
         result = {
             "label": 'Glióma',
-            "content": "Egyfajta daganat, amely az agyban és a "
-            "gerincvelőben, az idegsejtek környékében tud "
-            "kialakulni, az elején segítik a támogatósejtek "
-            "működését. Az agydaganatok leggyakoribb típusa. "
-            "Többféle tünete lehet, amik főleg az agy működésében "
-            "és az idegrendszerben való változásra utalnak. ",
+            "content": '''Olyan daganattípus, amely az agyban és a gerincvelőben, az idegsejteket körülvevő támogató sejtekből alakulhat ki.
+                        Ezek a sejtek normál esetben az idegsejtek működését segítik.
+                        Ez az agydaganatok leggyakoribb típusa.
+                        Tünetei sokfélék lehetnek, és leginkább az agyi működés, illetve az idegrendszer működésének megváltozására utalnak.''',
             "link": f'http://localhost:5000/pages/{WEBLINKS[tumor_type]}', #"https://orvos24.com/a-glioma-tunetei-es-okai",
             "accuracy": accuracy,}
     elif tumor_type == 2:
         result = {
             "label": 'Agyalapi mirigy daganat',
-            "content": "A legtöbb ilyen típusú elváltozás "
-            "jóindulatú, a tünetei változóak lehetnek, de "
-            "vér- és vizeletvizsgálat, valamint képalkotó "
-            "eljárások segíthetnek a diagnózisban. Ez a fajta "
-            "daganat nem terjed át más szervekre viszont a "
-            "szervezet hormontermelése megváltozhat. ",
+            "content": '''Az ilyen típusú elváltozások többsége jóindulatú.
+                        A tünetek változatosak lehetnek, a diagnózis felállítását pedig
+                        vér- és vizeletvizsgálatok, valamint képalkotó eljárások segítik.
+                        Ez a daganattípus nem ad áttétet más szervekbe, azonban
+                        a szervezet hormontermelésében változásokat okozhat.''',
             "link": f'http://localhost:5000/pages/{WEBLINKS[tumor_type]}',#"https://egeszsegvonal.gov.hu/egeszseg-a-z/a-a/agyalapi-mirigy-daganata.html",
             "accuracy": accuracy,}
     elif tumor_type == 3:    
         result = {
             "label": 'Egészséges kép',
-            "content": "A feltöltött képen nem található semmilyen elváltozás/tumor.",
+            "content": '''A feltöltött képen nem található kimutatható elváltozás vagy daganat.''',
             "link": f'http://localhost:5000/pages/{WEBLINKS[tumor_type]}',
             "accuracy": accuracy,}
     elif tumor_type == 4:    
         result = {
             "label": 'Agyvérzés',
-            "content": "Az agyvérzés egy életveszélyes állapot, amikor az agyban egy agyi ér" 
-                        "sérül és elpattan. Az agyban vérzés alakul ki, ez kívülről nem látszik, és ezáltal" 
-                        "a koponyában felgyülemlik a vér és megnő a nyomás, ami meg tudja ölni az agyi sejteket." 
-                        "Ez meg tudja gátolni a további vér és oxigén ellátását az agynak, ami szükséges a működéshez"
-                        " és a túléléshez. Az agyvérzésnek több tünete is lehet ami gyorsan rosszabbodhat és agykárosodást"
-                        " is okozhat, de akár halálos is lehet. Az agyvérzésnek tünete a fejfájás, szédülés, beszédnehézség" 
-                        "és a beszéd megértése, egy oldalas gyengeség, ez arcon is és kézen is jelentkezhet, ezeken kívül más"
-                        " tünet is jelentkezhet, de ha ilyen tüneteket vél felfedezni, minél előbb hívja a mentőket."
-                        "További tünetek és részletesebb leírás ezen a linken érhető el:",
+            "content": '''Az agyvérzés egy életveszélyes állapot, amely akkor alakul ki, amikor az agyban egy ér megsérül és megreped. 
+                        Ennek következtében vérzés keletkezik az agyban, ami kívülről nem látható, viszont a koponyán belüli nyomás megnő. 
+                        Ez károsíthatja vagy el is pusztíthatja az agysejteket.
+                        A kialakuló vérzés akadályozhatja az agy megfelelő vérellátását és oxigénellátását, ami elengedhetetlen a normális működéshez
+                         és a túléléshez. Az agyvérzés tünetei gyorsan súlyosbodhatnak, maradandó agykárosodást okozhatnak, 
+                         és akár halálos kimenetelűek is lehetnek.
+                        Gyakori tünetei közé tartozik az erős fejfájás, szédülés, beszédzavar vagy a beszéd megértésének nehézsége, valamint az arc, 
+                        a kar vagy a láb egyik oldalának gyengesége. Ha ezek közül bármelyik tünet jelentkezik, haladéktalanul hívja a mentőket.'''
+                        ,
             "link": f'http://localhost:5000/pages/{WEBLINKS[tumor_type]}',
             "accuracy": accuracy,}
     elif tumor_type == 5:    
         result = {
             "label": "Agyi infarktus",
-            "content": "Az agyi infarktus nagyon hasonlít egy agyvérzéshez, mint tünetekben mint végeredményben is." 
-            "Viszont az esetek nagyobb részében agyi infarktusról beszélünk. Az agyi infarktus akkor alakul ki mikor" 
-            " az agy egy része nem kapnak vért  érelzáródás miatt. Mivel az agynak szüksége van folyamatos oxigén és "
-            "tápanyag ellátásra, ezért az agysejtek ilyen esetekben perceken belül nekiállnak meghalni. Az agyi infarktusnak " 
-            "főbb tünetei a beszédzavar, egy oldalas gyengeség, bénulás ami arcon vagy kézen jelentkezik. Ha ilyen tüneteket "
-            "vél felfedezni valakin hívja a mentőket és jegyzezze fel az időpontot mikor jelentkeztek elösszőr ezek a tünetek."
-            " Részletesebb leíráshoz olvasson tovább a következő linken:",
+            "content": '''Az agyi infarktus tüneteiben és következményeiben nagyon hasonló az agyvérzéshez, ugyanakkor az esetek többségében 
+                        agyér-elzáródásról (agyi infarktusról) beszélünk.
+                        Az agyi infarktus akkor alakul ki, amikor az agy egy területe nem jut megfelelő mennyiségű vérhez egy ér elzáródása miatt. 
+                        Mivel az agy folyamatos oxigén- és tápanyagellátást igényel, az érintett agysejtek perceken belül károsodni, majd elhalni 
+                        kezdenek. Leggyakoribb tünetei közé tartozik a beszédzavar, az arc, a kar vagy a láb egyik oldalának gyengesége vagy bénulása. 
+                        Amennyiben ilyen tüneteket észlel valakin, azonnal hívja a mentőket, és lehetőség szerint jegyezze fel, mikor jelentkeztek 
+                        először a tünetek, mert ez kulcsfontosságú az ellátás szempontjából.''',
             "link": f'http://localhost:5000/pages/{WEBLINKS[tumor_type]}',
             "accuracy": accuracy,}
     else:
         result = {
             "label": 'Valami más',
-            "content": "Valami más típusú elváltozás lehet. Ajánlott olrvoshoz fordulni a problémával.",
+            "content": '''A feltöltött kép alapján más típusú elváltozás is fennállhat. A pontos diagnózis érdekében javasolt szakorvoshoz fordulni, 
+                        aki további vizsgálatokkal meg tudja állapítani a probléma okát.''',
             "link": "",
             "accuracy": accuracy,
         }

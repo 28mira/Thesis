@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Box, Typography, Stack } from "@mui/material";
 import { RadarChart } from "@mui/x-charts";
+import { Padding } from "@mui/icons-material";
 
 const CompareModel = () => {
   const stripeColor = (index: number) => {
@@ -50,8 +51,8 @@ const CompareModel = () => {
           height: "min-content",
           backgroundColor: "#7e0000ff",
           color: "#aee0ffff",
-          maxHeight: 720,
-          minHeight: 720,
+          maxHeight: 750,
+          minHeight: 750,
           padding: 1,
           margin: 1,
           borderRadius: 10,
@@ -61,7 +62,7 @@ const CompareModel = () => {
         <Typography
           variant="h4"
           sx={{
-            padding: 2,
+            padding: 1,
             fontFamily: "Meow Script Cursive",
             fontWeight: "bold",
             fontStyle: "normal",
@@ -79,49 +80,27 @@ const CompareModel = () => {
             fontSize: 20,
           }}
         >
-          A képeken az elváltozások kijelölését egy úgynevezett u-net modell,
-          annak is egy MONAI-s verzioja segitségével van megvalósítva. A MONAI
-          egy kimondottan orvosi képfeldolgozáshoz létrehozott python könyvtár,
-          ami bárki számára elérhető. A tanításhoz a modellnek meg kell adni az
-          eredeti képet és ennek a képnek a maszkját, amin rajt van az
-          elváltozás is.
+          Az elváltozások kijelölését a képeken egy U-Net típusú modell végzi,
+          amelynek MONAI-alapú megvalósítását használtam. A MONAI egy
+          kifejezetten orvosi képfeldolgozásra fejlesztett, nyílt forráskódú
+          Python könyvtár, amely bárki számára szabadon elérhető. A tanítás
+          során a modell bemeneteként az eredeti kép, valamint a hozzá tartozó
+          maszk szolgál, amely pontosan jelöli az elváltozás helyét. Ezek
+          alapján a hálózat megtanulja az elváltozások felismerését és
+          elkülönítését a képeken.
         </Typography>
         <Box
           sx={{
-            backgroundColor: "#aee0ffff",
-            borderRadius: 10,
+            textAlign: "center",
+            padding: 2,
+            margin: 2,
           }}
         >
-          {/*<RadarChart
-            stripeColor={stripeColor}
-            loading={false}
-            highlight="axis"
-            height={300}
-            width={300}
-            colors={["#002360ff"]}
-            shape="circular"
-            series={[
-              {
-                label: "Ditaiails",
-                data: [
-                  Number(modelData.accuracy),
-                  Number(modelData.loss),
-                  Number(modelData.val_loss),
-                  Number(modelData.precision),
-                  Number(modelData.recall),
-                  Number(modelData.f1_score),
-                ],
-              },
-            ]}
-            radar={{
-              metrics: [
-                { name: "Accuracy", max: 1, min: 0.3 },
-                { name: "Precision", max: 0.0, min: 1.0 },
-                { name: "Recall", max: 0.0, min: 1.0 },
-                { name: "F1 Score", max: 1, min: 0.3 },
-              ],
-            }}
-          />*/}
+          <img
+            src="/web_img.png"
+            alt="A modell és az eredeti elváltozás"
+            style={{ borderRadius: 15 }}
+          />
         </Box>
       </Box>
     </Box>

@@ -8,7 +8,13 @@ import AddPohotoAlternate from "@mui/icons-material/AddPhotoAlternate";
 import { HideImage } from "@mui/icons-material";
 import { useState } from "react";
 import { useEffect } from "react";
-import { Card, Typography } from "@mui/material";
+import { Card, createTheme, Typography } from "@mui/material";
+
+const theme = createTheme({
+  typography: {
+    fontFamily: '"Playwrite NZ Basic", cursiv',
+  },
+});
 
 async function handleOnChange(image: any) {
   let tumortype = 0;
@@ -26,6 +32,7 @@ async function handleOnChange(image: any) {
     console.log("Success:", resp);
     tumortype = Number(resp.prediction);
     accuracy = Number(resp.accuracy);
+    if (resp.result_image )
     result_image = resp.result_image;
   } catch (error) {
     console.error("Error", error);
@@ -60,15 +67,19 @@ const ImageAnalysis = () => {
           accuracy: data.accuracy,
           link: data.link,
         });
-        if (data.label >= 3) setDontShowImage(true);
-        if (data.label !== 3) setDontShowLink(true);
       })
       .catch((error) => console.error("Error fetching message:", error));
-  }, [tumorType]);
+  }, [tumorType, accuracy]);
 
   const onChange = (imageList: any, addUpdateIndex: any) => {
     console.log(imageList, addUpdateIndex);
+    if (imageList.length > 0) {
+      setShowDetails(false);
+      setDontShowImage(false);
+      setDontShowLink(false);
+    }
     setImage(imageList);
+    //669bbc, 003049, fdf0d5, c1121f, 780000
   };
 
   return (
@@ -76,9 +87,9 @@ const ImageAnalysis = () => {
       <Box
         sx={{
           borderRadius: 10,
-          color: "#aee0ffff",
-          borderColor: "#002360ff",
-          backgroundColor: "#546d8fff",
+          color: "#fdf0d5",
+          borderColor: "#003049",
+          backgroundColor: "#669bbc",
           borderStyle: "solid",
           borderWidth: 1.5,
           padding: 2,
@@ -93,9 +104,7 @@ const ImageAnalysis = () => {
           <Typography
             variant="h3"
             sx={{
-              fontFamily: "Meow Script Cursive",
-              fontWeight: "400",
-              fontStyle: "normal",
+              fontFamily: "Playwrite NZ Basic",
             }}
           >
             Képelemzés
@@ -103,19 +112,21 @@ const ImageAnalysis = () => {
           <Typography
             variant="body1"
             sx={{
-              marginTop: 2,
-              marginBottom: 2,
+              padding: 2,
               fontFamily: "Meow Script Cursive",
               fontWeight: "400",
               fontStyle: "normal",
               fontSize: 20,
             }}
           >
-            Mestereséges intelligencia segítségével elemzésre kerül az ide
-            feltöltött kép, ami 6 féle diagnózist adhat vissza. A modell 3 féle
-            elváltozást ismer fel ezek a meningeóma, a glióma és az agyalapi
-            mirigy daganat, ezeken kívül lehet más fajta elváltozás is és
-            teljesen egészséges kép az agyról.
+            A feltöltött kép mesterséges intelligencia segítségével kerül
+            elemzésre. A modell összesen hatféle állapotot képes felismerni:
+            meningeóma, glióma, agyalapi mirigy daganat, agyvérzés, agyi
+            infarktus, valamint az egészséges állapot. Az elemzés eredményeként
+            a rendszer azt jelzi, hogy az adott kép mennyire illeszkedik az
+            egyes tanult mintákhoz. Amennyiben az egyezés nem egyértelmű, a
+            modell jelezheti, hogy az eset további orvosi vizsgálatot
+            igényelhet.
           </Typography>
         </Box>
         <Box sx={{ flex: 1, height: "max-content" }}>
@@ -143,7 +154,7 @@ const ImageAnalysis = () => {
                         <img
                           src={image["data_url"]}
                           alt="image"
-                          height="120"
+                          height="250"
                           width="auto"
                           style={{ borderRadius: "15px" }}
                         />
@@ -154,7 +165,12 @@ const ImageAnalysis = () => {
                             sx={{ marginRight: 1 }}
                             variant="contained"
                             color="error"
-                            onClick={() => onImageRemove(index)}
+                            onClick={() => {
+                              onImageRemove(index);
+                              setShowDetails(false);
+                              setDontShowImage(false);
+                              setDontShowLink(false);
+                            }}
                           >
                             <HideImage />
                           </Button>
@@ -172,8 +188,15 @@ const ImageAnalysis = () => {
                                 const result_image = type.split(",")[2];
                                 setTumorType(Number(a));
                                 setAccuracy(Number(l));
-                                setResultImage(result_image);
+                                setResultImage(result_image+ "?t=" + new Date().getTime());
+                                if (Number(a) > 2 && Number(a) <= 10)
+                                  setDontShowImage(false);
+                                else setDontShowImage(true);
+                                if (Number(a) == 3 || Number(a) == 10)
+                                  setDontShowLink(false);
+                                else setDontShowLink(true);
                               });
+
                               setShowDetails(true);
                             }}
                           >
@@ -229,26 +252,29 @@ const ImageAnalysis = () => {
                   fontFamily: "Meow Script Cursive",
                   fontWeight: "400",
                   fontStyle: "normal",
+                  marginLeft: 4,
                   fontSize: 20,
                 }}
               >
                 {resultData.content}
               </Typography>
               {dontShowLink && (
-                <a
-                  href={resultData.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    color: "#002360ff",
-                    fontFamily: "Meow Script Cursive",
-                    fontWeight: "400",
-                    fontStyle: "normal",
-                    fontSize: 20,
-                  }}
-                >
-                  Ide kettintva tudsz tovább olvasni
-                </a>
+                <Box sx={{ marginLeft: 4 }}>
+                  <a
+                    href={resultData.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      color: "#002360ff",
+                      fontFamily: "Meow Script Cursive",
+                      fontWeight: "400",
+                      fontStyle: "normal",
+                      fontSize: 20,
+                    }}
+                  >
+                    Ide kettintva tudsz tovább olvasni
+                  </a>
+                </Box>
               )}
             </Box>
             {dontShowImage && (
@@ -265,17 +291,17 @@ const ImageAnalysis = () => {
                 >
                   Az elváltozás helye:
                 </Typography>
-                <img
-                  src={resultImage}
-                  alt="Place of the tumor"
-                  style={{
-                    width: "100%",
-                    height: "80%",
-                    objectFit: "contain",
-                    padding: "5px",
-                    borderRadius: "30px",
-                  }}
-                />
+                <Box sx={{ textAlign: "center" }}>
+                  <img
+                    src={resultImage}
+                    alt="Place of the tumor"
+                    style={{
+                      objectFit: "contain",
+                      borderRadius: 15,
+                      maxHeight: 400,
+                    }}
+                  />
+                </Box>
               </Box>
             )}
           </Box>

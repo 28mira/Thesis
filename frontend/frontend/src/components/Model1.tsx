@@ -52,8 +52,8 @@ const Model1 = () => {
           height: "min-content",
           backgroundColor: "#aee0ffff",
           color: "#002360ff",
-          maxHeight: 720,
-          minHeight: 720,
+          maxHeight: 750,
+          minHeight: 750,
           padding: 1,
           margin: 1,
           borderRadius: 10,
@@ -63,7 +63,7 @@ const Model1 = () => {
         <Typography
           variant="h4"
           sx={{
-            padding: 2,
+            padding: 1,
             fontFamily: "Meow Script Cursive",
             fontWeight: "bold",
             fontStyle: "normal",
@@ -78,17 +78,19 @@ const Model1 = () => {
             fontFamily: "Meow Script Cursive",
             fontWeight: "400",
             fontStyle: "normal",
+            marginLeft: 12,
             fontSize: 20,
           }}
         >
-          A képfeldolgozást egy úgynevezett CNN (Convolutional Neural Network)
-          kettő mélységű hálóval készítettem el. Mivel ez könnyen tanítható
-          kisebb adatmennyiségeken és a futási ideje sem nagyon hosszú. Azért
-          nem használtam egy nagyobb,komplexebb modellt mert így is voltak
-          problémák a túltanulással, mivel nem áll rendelkezésemre sok adat. Még
-          érdemes tudni a modellről, hogy a képeket 256x256-os méretben 1
-          csatornán dolgozza fel, ez azt jelenti hogy fekete fehérek a képek, és
-          6 féle elváltozásra tudja szétbontani a képeket.
+          A képfeldolgozást egy konvolúciós neurális hálózattal (CNN –
+          Convolutional Neural Network) valósítottam meg, mivel ez a megoldás
+          kisebb adatmennyiségek esetén is jól tanítható, és a futási ideje sem
+          túl hosszú. A tanítás során azonban túltanulási problémák is
+          jelentkeztek, ami annak tudható be, hogy nem állt rendelkezésre
+          elegendő mennyiségű adat. A modell a bemeneti képeket 256×256 pixeles
+          méretben, egyetlen csatornán dolgozza fel, vagyis szürkeárnyalatos
+          képekkel működik. Az így feldolgozott képeket hat különböző
+          elváltozási kategóriába képes besorolni.
         </Typography>
         <Box sx={{ padding: 2 }}>
           <RadarChart

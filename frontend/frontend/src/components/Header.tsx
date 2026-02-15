@@ -12,8 +12,8 @@ const Header = () => {
         flex: 1,
         flexDirection: "row",
         textAlign: "right",
-        backgroundColor: "#002360ff",
-        color: "#7e0000ff",
+        backgroundColor: "primary.main",
+        color: "",
         width: "100%",
         padding: 1,
       }}
@@ -32,10 +32,9 @@ const Header = () => {
           component={Link}
           to="/"
           style={{
-            color: "#546d8fff",
+            color: "#text.secondary",
             fontWeight: "bold",
             borderRadius: 10,
-            fontFamily: "Meow Script Cursive",
             fontStyle: "normal",
             fontSize: 16,
           }}
@@ -46,10 +45,9 @@ const Header = () => {
           component={Link}
           to="/UserModel"
           style={{
-            color: "#546d8fff",
+            color: "#primary.contrastText",
             fontWeight: "bold",
             borderRadius: 10,
-            fontFamily: "Meow Script Cursive",
             fontStyle: "normal",
             fontSize: 16,
           }}

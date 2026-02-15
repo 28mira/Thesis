@@ -6,17 +6,17 @@ const Introduction = () => {
     <Box
       flexDirection={"row"}
       width="100%"
-      bgcolor="#002360ff"
-      color="#aee0ffff"
+      bgcolor="#780000"
+      color="#fdf0d5"
       padding={2}
       display={"flex"}
     >
       <Typography
         variant="h2"
         textAlign={"left"}
-        fontFamily="Meow Script Cursive"
-        fontWeight="400"
-        fontStyle="normal"
+        sx={{
+          fontFamily: "Playwrite NZ Basic",
+        }}
       >
         Agyi daganatok detektálása MRI képekről
       </Typography>

@@ -45,7 +45,9 @@ const UserModel = () => {
     try {
       const saved = getLocalStorageWithExpiry("imagesByType");
       if (!saved || saved === "undefined") return [];
-      return JSON.parse(saved);
+      return saved.map((list: any[]) =>
+        list.map((url) => ({ data_url: url, file: null })),
+      );
     } catch {
       return [];
     }
@@ -55,7 +57,7 @@ const UserModel = () => {
     try {
       const saved = getLocalStorageWithExpiry("labelNames");
       if (!saved || saved === "undefined") return [];
-      return JSON.parse(saved);
+      return saved.map((name: any) => String(name));
     } catch {
       return [];
     }
@@ -63,8 +65,7 @@ const UserModel = () => {
 
   const [showDetails, setShowDetails] = useState(() => {
     const saved = getLocalStorageWithExpiry("showDetails");
-    if (!saved || saved === "undefined") return false;
-    return imagesByType.length > 0;
+    return saved ?? false
   });
   const [showModel, setShowModel] = useState(() => {
     const saved = getLocalStorageWithExpiry("showModel");
@@ -77,7 +78,7 @@ const UserModel = () => {
 
   useEffect(() => {
     const imagesData = imagesByType.map((list) =>
-      list.map((img: any) => ({ data_url: img.data_url })),
+      list.map((img: any) => img.data_url),
     );
     setLocalStorageWithExpiry("imagesByType", imagesData);
   }, [imagesByType]);
@@ -102,7 +103,8 @@ const UserModel = () => {
       imagesByType.forEach((images, typeIndex) => {
         formData.append(`label_${typeIndex}`, labelNames[typeIndex]);
         images.forEach((image, imageIndex) => {
-          formData.append(`type_${typeIndex}`, image.file);
+          if (image.file) formData.append(`type_${typeIndex}`, image.file);
+          else console.warn(`Hiányzó fájl a ${typeIndex}. típusnál`);
         });
       });
       formData.append("numtypes", numberOfTypes.toString());
@@ -146,13 +148,14 @@ const UserModel = () => {
             fontSize: 24,
           }}
         >
-          Az alábbi mezőbe lehet beírni, hogy mennyi féle elváltozást szeretnél
-          tanítani, ez minimum 3 és maximum 8 lehet, utána meg fog jelleni annyi
-          képfeltöltési lehetőség amennyi be lett írva. Majd minden elváltozást
-          külön képfeltölő részhez tölts fel, mert ha keverednek a képek akkor a
-          model sem lesz pontos, ami ezek alapján a képek alapján fog tanulni.
-          Ha modell megtanult, akkor meg fog jelenni egy képfeltöltő lehetőség,
-          ahol ki lehet majd probálni.
+          Az alábbi mezőben add meg, hány különböző elváltozást szeretnél a
+          modellnek megtanítani. A megadható érték{" "}
+          <strong>minimum 4, maximum 8</strong>. A szám megadása után
+          automatikusan megjelenik ugyanennyi képfeltöltési lehetőség. Fontos,
+          hogy minden elváltozáshoz külön tölts fel képeket, és ne keverd őket,
+          mert ez rontaná a modell pontosságát. Miután a tanítás befejeződött,
+          megjelenik egy új képfeltöltő mező, ahol kipróbálhatod a betanított
+          modellt.
         </Typography>
         <Box
           sx={{
@@ -193,11 +196,6 @@ const UserModel = () => {
               setShowDetails(true);
               setImagesByType(Array.from({ length: numtype }, () => []));
               setLabelNames(Array.from({ length: numtype }, () => ""));
-              /*setImagesByType(
-                Array.from({ length: numtype }, (_, i) => imagesByType[i] || [])
-              );
-              setLabelNames(Array.from({ length: numtype }, (_, i) => labelNames[i] || ""));
-              */
             }}
           />
         </Box>
@@ -243,6 +241,7 @@ const UserModel = () => {
                       <input
                         type="text"
                         value={labelNames[index] ?? ""}
+                        placeholder={`Elváltozás neve`}
                         onChange={(e) => {
                           const newLabels = [...labelNames];
                           newLabels[index] = e.target.value;

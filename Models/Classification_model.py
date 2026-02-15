@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
 import h5py
+import joblib as jl
 import tensorflow as tf
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, classification_report
@@ -77,21 +78,60 @@ def loadNormalImages(X,y):
 
                 X.append(image_array)
                 y.append(3)
+    return X,y
+
+def loadStrokeHoImages(X,y):
+    input_folder = r'C:\Users\marto\Desktop\Szakdolgozat\pogram\brainTumor\Stroke_Haemorrhage'
+    for file_name in sorted(os.listdir(input_folder)):
+            if file_name.endswith('.jpg'):
+                file_path = os.path.join(input_folder,file_name)
+                
+                img = preprocessing.image.load_img(file_path,target_size=(256, 256),
+                                                    color_mode="grayscale")
+                image_array = preprocessing.image.img_to_array(img)
+                image_array = image_array/255.0
+
+                X.append(image_array)
+                y.append(4)
+    return X,y 
+
+def loadStrokeInImages(X,y):
+    input_folder = r'C:\Users\marto\Desktop\Szakdolgozat\pogram\brainTumor\Stroke_infarct'
+    for file_name in sorted(os.listdir(input_folder)):
+            if file_name.endswith('.jpg'):
+                file_path = os.path.join(input_folder,file_name)
+                
+                img = preprocessing.image.load_img(file_path,target_size=(256, 256),
+                                                    color_mode="grayscale")
+                image_array = preprocessing.image.img_to_array(img)
+                image_array = image_array/255.0
+
+                X.append(image_array)
+                y.append(5)
     return np.array(X,dtype="float32"), np.array(y,dtype="int")
 
 def cnnModel():
     model = models.Sequential() 
     model.add(layers.Input(shape=(256, 256, 1)))
     model.add(layers.Conv2D(64, (3, 3), activation='relu'))
-    model.add(layers.MaxPooling2D((2, 2)))
+    model.add(layers.MaxPooling2D())
     model.add(layers.Conv2D(64, (3, 3), activation='relu'))
+    model.add(layers.MaxPooling2D())
+    model.add(layers.Conv2D(64, (3, 3), activation='relu'))
+    model.add(layers.MaxPooling2D())
+    model.add(layers.Conv2D(64, (3, 3), activation='relu'))
+    model.add(layers.MaxPooling2D())
+    model.add(layers.Conv2D(64, (3, 3), activation='relu'))
+    model.add(layers.MaxPooling2D())
+    model.add(layers.Conv2D(64, (3, 3), activation='relu'))
+    model.add(layers.MaxPooling2D())
     model.add(layers.Flatten())
-    model.add(layers.Dense(4,activation='softmax'))
+    model.add(layers.Dense(6,activation='softmax'))
     return model
 
 def save_results(model, history, X_test, y_test):
-    #model.save('C:/Users/marto/Desktop/Thesis/backend/models/BrainTumorClassificationModel.h5')
-    #jl.dump(history,'C:/Users/marto/Desktop/Thesis/backend/models/BrainTumorClassificationHistory.pkl')
+    model.save('C:/Users/marto/Desktop/Thesis/backend/models/BrainTumorClassificationModel.h5')
+    jl.dump(history,'C:/Users/marto/Desktop/Thesis/backend/models/BrainTumorClassificationHistory.pkl')
     np.save('C:/Users/marto/Desktop/Thesis/backend/brainTumor_y_test.npy',y_test)
     np.save('C:/Users/marto/Desktop/Thesis/backend/brainTumor_X_test.npy', X_test)  
 
@@ -124,6 +164,10 @@ def main():
     X, y = [], []
     X, y = loadImages(), loadLabels()
     X, y = loadNormalImages(X,y)
+    X, y = loadStrokeHoImages(X,y)
+    X, y = loadStrokeInImages(X,y)
+    
+
     
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
 
@@ -140,7 +184,7 @@ def main():
     model = cnnModel()
 
     model.compile(optimizer='adam', loss=tf.keras.losses.SparseCategoricalCrossentropy(), metrics=['accuracy'])
-    history = model.fit(train_generated, epochs=40, validation_data=(X_test,y_test))
+    history = model.fit(train_generated, epochs=50, validation_data=(X_test,y_test))
     
     save_results(model, history, X_test, y_test)
     aboutModel(model, X_test, y_test)

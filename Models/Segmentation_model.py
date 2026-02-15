@@ -2,20 +2,15 @@ import os
 import h5py
 import numpy as np
 import torch
-from tensorflow.keras import preprocessing
 import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader
 from monai.networks.nets import UNet
 from monai.losses import DiceLoss
 from monai.metrics import DiceMetric
 import cv2
-from torch.optim import Adam
-import torch
 
 def LoadImageAndMask():
     input_folder = r'C:\Users\marto\Desktop\Szakdolgozat\pogram\brainTumor\data'
-    #all_images = []
-    #all_masks = []
     datas = []
     img_size = (256,256)
     for file_name in sorted(os.listdir(input_folder)):
@@ -60,7 +55,7 @@ def modleEpochs(model, train):
     optimizer = torch.optim.Adam(model.parameters(), 1e-4)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = model.to(device)
-    for epoch in range(35):
+    for epoch in range(55):
         model.train()
         epoch_loss = 0
         for i,(images, masks) in enumerate(train):

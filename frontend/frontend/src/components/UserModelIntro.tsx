@@ -7,8 +7,8 @@ const Introduction = () => {
       flexDirection={"row"}
       textAlign="left"
       width="100%"
-      bgcolor="#002360ff"
-      color="#aee0ffff"
+      bgcolor="#780000"
+      color="#fdf0d5"
       padding={2}
       display={"flex"}
       marginBottom={2}
