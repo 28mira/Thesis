@@ -7,18 +7,13 @@ const Introduction = () => {
       flexDirection={"row"}
       textAlign="left"
       width="100%"
-      bgcolor="#780000"
-      color="#fdf0d5"
+      bgcolor="warning.main"
+      color="warning.contrastText"
       padding={2}
       display={"flex"}
       marginBottom={2}
     >
-      <Typography
-        variant="h2"
-        fontFamily="Meow Script Cursive"
-        fontWeight="400"
-        fontStyle="normal"
-      >
+      <Typography variant="h2" sx={{ fontWeight: "bold" }}>
         A felhasználói modell tanítása
       </Typography>
     </Box>

@@ -10,12 +10,6 @@ import { useState } from "react";
 import { useEffect } from "react";
 import { Card, createTheme, Typography } from "@mui/material";
 
-const theme = createTheme({
-  typography: {
-    fontFamily: '"Playwrite NZ Basic", cursiv',
-  },
-});
-
 async function handleOnChange(image: any) {
   let tumortype = 0;
   let accuracy = 0.0;
@@ -32,8 +26,7 @@ async function handleOnChange(image: any) {
     console.log("Success:", resp);
     tumortype = Number(resp.prediction);
     accuracy = Number(resp.accuracy);
-    if (resp.result_image )
-    result_image = resp.result_image;
+    if (resp.result_image) result_image = resp.result_image;
   } catch (error) {
     console.error("Error", error);
   }
@@ -87,9 +80,9 @@ const ImageAnalysis = () => {
       <Box
         sx={{
           borderRadius: 10,
-          color: "#fdf0d5",
-          borderColor: "#003049",
-          backgroundColor: "#669bbc",
+          color: "secondary.contrastText",
+          borderColor: "secondary.main",
+          backgroundColor: "secondary.main",
           borderStyle: "solid",
           borderWidth: 1.5,
           padding: 2,
@@ -101,22 +94,11 @@ const ImageAnalysis = () => {
         }}
       >
         <Box sx={{ flex: 1 }}>
-          <Typography
-            variant="h3"
-            sx={{
-              fontFamily: "Playwrite NZ Basic",
-            }}
-          >
-            Képelemzés
-          </Typography>
+          <Typography variant="h4">Képelemzés</Typography>
           <Typography
             variant="body1"
             sx={{
               padding: 2,
-              fontFamily: "Meow Script Cursive",
-              fontWeight: "400",
-              fontStyle: "normal",
-              fontSize: 20,
             }}
           >
             A feltöltött kép mesterséges intelligencia segítségével kerül
@@ -188,7 +170,9 @@ const ImageAnalysis = () => {
                                 const result_image = type.split(",")[2];
                                 setTumorType(Number(a));
                                 setAccuracy(Number(l));
-                                setResultImage(result_image+ "?t=" + new Date().getTime());
+                                setResultImage(
+                                  result_image + "?t=" + new Date().getTime(),
+                                );
                                 if (Number(a) > 2 && Number(a) <= 10)
                                   setDontShowImage(false);
                                 else setDontShowImage(true);
@@ -226,9 +210,9 @@ const ImageAnalysis = () => {
               borderRadius: 10,
               height: "min-content",
               textAlign: "left",
-              border: "1.5px solid #002360ff",
-              color: "#aee0ffff",
-              backgroundColor: "#546d8fff",
+              border: "1.5px solid secondary.main",
+              color: "secondary.contrastText",
+              backgroundColor: "secondary.main",
               padding: 2,
               margin: 1,
             }}
@@ -238,9 +222,6 @@ const ImageAnalysis = () => {
                 variant="h4"
                 sx={{
                   padding: 2,
-                  fontFamily: "Meow Script Cursive",
-                  fontWeight: "400",
-                  fontStyle: "normal",
                 }}
               >
                 {resultData.label}:
@@ -249,11 +230,7 @@ const ImageAnalysis = () => {
                 sx={{
                   width: "90%",
                   height: "90%",
-                  fontFamily: "Meow Script Cursive",
-                  fontWeight: "400",
-                  fontStyle: "normal",
                   marginLeft: 4,
-                  fontSize: 20,
                 }}
               >
                 {resultData.content}
@@ -264,15 +241,9 @@ const ImageAnalysis = () => {
                     href={resultData.link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    style={{
-                      color: "#002360ff",
-                      fontFamily: "Meow Script Cursive",
-                      fontWeight: "400",
-                      fontStyle: "normal",
-                      fontSize: 20,
-                    }}
+                    style={{ color: "#669bbc" }}
                   >
-                    Ide kettintva tudsz tovább olvasni
+                    <Typography>Ide kettintva tudsz tovább olvasni</Typography>
                   </a>
                 </Box>
               )}
@@ -283,10 +254,7 @@ const ImageAnalysis = () => {
                   variant="h4"
                   sx={{
                     padding: 2,
-                    color: "#aee0ffff",
-                    fontFamily: "Meow Script Cursive",
-                    fontWeight: "400",
-                    fontStyle: "normal",
+                    color: "secondary.contrastText",
                   }}
                 >
                   Az elváltozás helye:

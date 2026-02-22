@@ -111,7 +111,7 @@ def upload_file():
         bin = (binary_preds.detach().cpu().numpy()[0,0]>0.5)
         rgb = cv2.cvtColor((pic[0,:,:,0]*255).astype(np.uint8), cv2.COLOR_GRAY2BGR)
         bin_color = np.zeros_like(rgb)
-        bin_color[bin] = [0,255,255]
+        bin_color[bin] = [0,135,250]
         blended = cv2.addWeighted(rgb,1.0,bin_color,0.4,0)
 
         matplotlib.use('Agg')

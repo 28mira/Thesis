@@ -49,9 +49,9 @@ const ImageAnalysis = () => {
       <Box
         sx={{
           borderRadius: 10,
-          color: "#aee0ffff",
-          borderColor: "#002360ff",
-          backgroundColor: "#546d8fff",
+          color: "secondary.contrastText",
+          borderColor: "secondary.main",
+          backgroundColor: "secondary.main",
           borderStyle: "solid",
           borderWidth: 1.5,
           padding: 2,
@@ -63,25 +63,12 @@ const ImageAnalysis = () => {
         }}
       >
         <Box sx={{ flex: 1 }}>
-          <Typography
-            variant="h3"
-            sx={{
-              fontFamily: "Meow Script Cursive",
-              fontWeight: "400",
-              fontStyle: "normal",
-            }}
-          >
-            Képelemzés
-          </Typography>
+          <Typography variant="h4">Képelemzés</Typography>
           <Typography
             variant="body1"
             sx={{
               marginTop: 2,
               marginBottom: 2,
-              fontFamily: "Meow Script Cursive",
-              fontWeight: "400",
-              fontStyle: "normal",
-              fontSize: 20,
             }}
           >
             Sikeres volt a modell tanítása a megadott képek alapján. Alább tudod
@@ -153,9 +140,9 @@ const ImageAnalysis = () => {
         <Box
           sx={{
             borderRadius: 10,
-            color: "#aee0ffff",
-            borderColor: "#002360ff",
-            backgroundColor: "#546d8fff",
+            color: "secondary.contrastText",
+            borderColor: "secondary.main",
+            backgroundColor: "secondary.main",
             borderStyle: "solid",
             borderWidth: 1.5,
             padding: 2,
@@ -166,24 +153,10 @@ const ImageAnalysis = () => {
             display: { xs: "block", md: "flex" },
           }}
         >
-          <Typography
-            variant="h5"
-            sx={{
-              fontFamily: "Meow Script Cursive",
-              fontWeight: "400",
-              fontStyle: "normal",
-            }}
-          >
+          <Typography variant="h5" sx={{}}>
             Eredmény:
           </Typography>
-          <Typography
-            sx={{
-              fontFamily: "Meow Script Cursive",
-              fontWeight: "400",
-              fontStyle: "normal",
-              fontSize: 20,
-            }}
-          >
+          <Typography sx={{}}>
             A feltöltött kép {accuracy} valószínúséggel egy {label}
           </Typography>
         </Box>

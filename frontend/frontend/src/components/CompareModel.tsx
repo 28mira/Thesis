@@ -4,10 +4,6 @@ import { RadarChart } from "@mui/x-charts";
 import { Padding } from "@mui/icons-material";
 
 const CompareModel = () => {
-  const stripeColor = (index: number) => {
-    return "#7e0000ff";
-  };
-
   const [modelData, setModelData] = useState({
     accuracy: null,
     loss: null,
@@ -49,23 +45,20 @@ const CompareModel = () => {
           flex: 1,
           textAlign: "left",
           height: "min-content",
-          backgroundColor: "#7e0000ff",
-          color: "#aee0ffff",
+          backgroundColor: "info.main",
+          color: "info.contrastText",
           maxHeight: 750,
           minHeight: 750,
           padding: 1,
           margin: 1,
           borderRadius: 10,
-          border: "1.5px solid #7e0000ff",
+          border: "1.5px solid #003049",
         }}
       >
         <Typography
           variant="h4"
           sx={{
             padding: 1,
-            fontFamily: "Meow Script Cursive",
-            fontWeight: "bold",
-            fontStyle: "normal",
           }}
         >
           A kijelölő modell jellemzői:
@@ -74,10 +67,6 @@ const CompareModel = () => {
           variant="body1"
           sx={{
             padding: 2,
-            fontFamily: "Meow Script Cursive",
-            fontWeight: "400",
-            fontStyle: "normal",
-            fontSize: 20,
           }}
         >
           Az elváltozások kijelölését a képeken egy U-Net típusú modell végzi,

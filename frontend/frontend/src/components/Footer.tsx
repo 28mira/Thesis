@@ -19,20 +19,14 @@ const Header = () => {
     >
       <Typography
         sx={{
-          fontFamily: "Meow Script Cursive",
-          fontWeight: "400",
           fontStyle: "normal",
-          fontSize: 20,
         }}
       >
         <Mail /> martonmira02@gmail.com
       </Typography>
       <Typography
         sx={{
-          fontFamily: "Meow Script Cursive",
-          fontWeight: "400",
           fontStyle: "normal",
-          fontSize: 20,
         }}
       >
         <Call /> +36 30 123 4567

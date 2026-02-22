@@ -6,16 +6,16 @@ const Introduction = () => {
     <Box
       flexDirection={"row"}
       width="100%"
-      bgcolor="#780000"
-      color="#fdf0d5"
+      bgcolor="warning.main"
+      color="warning.contrastText"
       padding={2}
       display={"flex"}
     >
       <Typography
         variant="h2"
-        textAlign={"left"}
         sx={{
-          fontFamily: "Playwrite NZ Basic",
+          fontWeight: "bold",
+          textAlign: "left",
         }}
       >
         Agyi daganatok detektálása MRI képekről

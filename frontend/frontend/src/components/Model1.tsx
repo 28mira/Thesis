@@ -6,7 +6,7 @@ import CompareModel from "./CompareModel";
 
 const Model1 = () => {
   const stripeColor = (index: number) => {
-    return "#002360ff";
+    return "#003049";
   };
 
   const [modelData, setModelData] = useState({
@@ -50,23 +50,20 @@ const Model1 = () => {
           flex: 1,
           textAlign: "left",
           height: "min-content",
-          backgroundColor: "#aee0ffff",
-          color: "#002360ff",
+          backgroundColor: "primary.main",
+          color: "primary.contrastText",
           maxHeight: 750,
           minHeight: 750,
           padding: 1,
           margin: 1,
           borderRadius: 10,
-          border: "1.5px solid #002360ff",
+          border: "1.5px solid #003049",
         }}
       >
         <Typography
           variant="h4"
           sx={{
             padding: 1,
-            fontFamily: "Meow Script Cursive",
-            fontWeight: "bold",
-            fontStyle: "normal",
           }}
         >
           A modellről:
@@ -75,11 +72,7 @@ const Model1 = () => {
           variant="body1"
           style={{
             padding: 2,
-            fontFamily: "Meow Script Cursive",
-            fontWeight: "400",
-            fontStyle: "normal",
             marginLeft: 12,
-            fontSize: 20,
           }}
         >
           A képfeldolgozást egy konvolúciós neurális hálózattal (CNN –
@@ -97,7 +90,7 @@ const Model1 = () => {
             stripeColor={stripeColor}
             height={300}
             width={300}
-            colors={["#7e0000ff"]}
+            colors={["#fdf0d5"]}
             series={[
               {
                 label: "Ditaiails",

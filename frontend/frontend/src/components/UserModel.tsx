@@ -65,7 +65,7 @@ const UserModel = () => {
 
   const [showDetails, setShowDetails] = useState(() => {
     const saved = getLocalStorageWithExpiry("showDetails");
-    return saved ?? false
+    return saved ?? false;
   });
   const [showModel, setShowModel] = useState(() => {
     const saved = getLocalStorageWithExpiry("showModel");
@@ -127,9 +127,9 @@ const UserModel = () => {
       <Box
         sx={{
           borderRadius: 10,
-          color: "#aee0ffff",
-          borderColor: "#002360ff",
-          backgroundColor: "#546d8fff",
+          color: "secondary.contrastText",
+          borderColor: "secondary.main",
+          backgroundColor: "secondary.main",
           borderStyle: "solid",
           borderWidth: 1.5,
           padding: 2,
@@ -140,14 +140,7 @@ const UserModel = () => {
           display: { xs: "block", md: "flex" },
         }}
       >
-        <Typography
-          sx={{
-            fontFamily: "Meow Script Cursive",
-            fontWeight: "400",
-            fontStyle: "normal",
-            fontSize: 24,
-          }}
-        >
+        <Typography sx={{}}>
           Az alábbi mezőben add meg, hány különböző elváltozást szeretnél a
           modellnek megtanítani. A megadható érték{" "}
           <strong>minimum 4, maximum 8</strong>. A szám megadása után
@@ -170,10 +163,6 @@ const UserModel = () => {
           <Typography
             sx={{
               marginRight: 2,
-              fontFamily: "Meow Script Cursive",
-              fontWeight: "400",
-              fontStyle: "normal",
-              fontSize: 24,
             }}
           >
             Elváltozások száma:
@@ -300,9 +289,10 @@ const UserModel = () => {
             </Box>
             <Button
               type="submit"
-              style={{
-                borderColor: "#002360ff",
-                color: "#002360ff",
+              sx={{
+                borderColor: "secondary.main",
+                color: "secondary.contrastText",
+                backgroundColor: "secondary.main",
                 borderStyle: "solid",
                 borderWidth: 1.5,
               }}

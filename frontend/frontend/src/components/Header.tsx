@@ -12,8 +12,8 @@ const Header = () => {
         flex: 1,
         flexDirection: "row",
         textAlign: "right",
-        backgroundColor: "primary.main",
-        color: "",
+        backgroundColor: "warning.main",
+        color: "warning.contrastText",
         width: "100%",
         padding: 1,
       }}
@@ -31,28 +31,26 @@ const Header = () => {
         <Button
           component={Link}
           to="/"
-          style={{
-            color: "#text.secondary",
+          sx={{
+            color: "text.secondary",
             fontWeight: "bold",
             borderRadius: 10,
             fontStyle: "normal",
-            fontSize: 16,
           }}
         >
-          Főoldal
+          <Typography>Főoldal</Typography>
         </Button>
         <Button
           component={Link}
           to="/UserModel"
-          style={{
-            color: "#primary.contrastText",
+          sx={{
+            color: "text.secondary",
             fontWeight: "bold",
             borderRadius: 10,
             fontStyle: "normal",
-            fontSize: 16,
           }}
         >
-          Felhasználói modell
+          <Typography>Felhasználói modell</Typography>
         </Button>
       </nav>
     </Box>
