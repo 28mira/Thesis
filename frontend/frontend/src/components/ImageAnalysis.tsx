@@ -72,7 +72,6 @@ const ImageAnalysis = () => {
       setDontShowLink(false);
     }
     setImage(imageList);
-    //669bbc, 003049, fdf0d5, c1121f, 780000
   };
 
   return (

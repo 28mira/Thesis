@@ -50,8 +50,8 @@ const Model1 = () => {
           flex: 1,
           textAlign: "left",
           height: "min-content",
-          backgroundColor: "primary.main",
-          color: "primary.contrastText",
+          backgroundColor: "info.main",
+          color: "info.contrastText",
           maxHeight: 750,
           minHeight: 750,
           padding: 1,
@@ -90,7 +90,7 @@ const Model1 = () => {
             stripeColor={stripeColor}
             height={300}
             width={300}
-            colors={["#fdf0d5"]}
+            colors={["#d62828"]}
             series={[
               {
                 label: "Ditaiails",

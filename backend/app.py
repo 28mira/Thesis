@@ -26,8 +26,8 @@ WEBLINKS = {
         1: 'glioma/glioma.html',
         2: 'amd/amd.html',
         3: '',
-        4: 'agyverzes/agyverzes.html',  #https://gyogyaszportal.hu/agyverzes/
-        5: 'agyinfarktus/AgyiInfarktus.html'   #https://egeszsegvonal.gov.hu/egeszseg-a-z/a-a/agyi-infarktus.html
+        4: 'agyverzes/agyverzes.html', 
+        5: 'agyinfarktus/AgyiInfarktus.html' 
     }
 
 y_test = np.load('brainTumor_y_test.npy',allow_pickle=True)
@@ -61,12 +61,12 @@ def summary():
     
     return jsonify({
         'model': 'Brain Tumor Classification Model',
-        'accuracy': float(accuracy_score(y_test, predicted_classes(brainTumorModel, X_test))),  #close to 1
-        'loss': float(np.mean(brainTumorHistory.history['loss'])),  #close to 0
-        'val_loss': float(np.mean(brainTumorHistory.history['val_loss'])),  #close to 0
-        'precision': float(report['weighted avg']['precision']),    #close to 1
-        'recall': float(report['weighted avg']['recall']),      #close to 1
-        'f1_score': float(report['weighted avg']['f1-score']),   #close to 1
+        'accuracy': float(accuracy_score(y_test, predicted_classes(brainTumorModel, X_test))), 
+        'loss': float(np.mean(brainTumorHistory.history['loss'])),  
+        'val_loss': float(np.mean(brainTumorHistory.history['val_loss'])),  
+        'precision': float(report['weighted avg']['precision']),    
+        'recall': float(report['weighted avg']['recall']),      
+        'f1_score': float(report['weighted avg']['f1-score']),   
     })
 
 @app.route('/api/upload', methods=['POST'])
@@ -85,7 +85,7 @@ def upload_file():
     img = np.expand_dims(img,axis=0)
     
     pred = brainTumorModel.predict(img)
-    pred_class = int(np.argmax(pred,axis=1)[0]) # 1 for meningioma, 2 for glioma, 3 for pituitary tumor
+    pred_class = int(np.argmax(pred,axis=1)[0]) 
     pred_prob = float(np.max(pred))
 
     if pred_class == 0 or pred_class == 1 or pred_class == 2:
@@ -111,7 +111,7 @@ def upload_file():
         bin = (binary_preds.detach().cpu().numpy()[0,0]>0.5)
         rgb = cv2.cvtColor((pic[0,:,:,0]*255).astype(np.uint8), cv2.COLOR_GRAY2BGR)
         bin_color = np.zeros_like(rgb)
-        bin_color[bin] = [0,135,250]
+        bin_color[bin] = [0,250,250]
         blended = cv2.addWeighted(rgb,1.0,bin_color,0.4,0)
 
         matplotlib.use('Agg')
@@ -122,9 +122,8 @@ def upload_file():
 
         plt.savefig(result_path, bbox_inches='tight', pad_inches=0)
 
-    
     print(f"Predicted class: {pred_class}, Probability: {pred_prob}")
-    if (pred_prob>=0.75):
+    if (pred_prob>=0.60):
         return jsonify({'message': 'Image received successfully', 
                         'prediction': pred_class,
                         'accuracy': pred_prob,
@@ -149,16 +148,20 @@ def user_model():
     numtypes = int(request.form.get("numtypes"))
     image_size = (128, 128)    
     if os.path.exists(input_folder):
+        db = 0
         for file_name in sorted(os.listdir(input_folder)):
             if file_name.endswith('.jpg'):
-                file_path = os.path.join(input_folder,file_name)
-                
-                img = preprocessing.image.load_img(file_path,target_size=image_size,
-                                                    color_mode="grayscale")
-                image_array = preprocessing.image.img_to_array(img)
-                image_array = image_array.flatten()/255.0
-                X.append(image_array)
-                y.append(classes)
+                if db >= 30: break
+                else:
+                    file_path = os.path.join(input_folder,file_name)
+                    
+                    img = preprocessing.image.load_img(file_path,target_size=image_size,
+                                                        color_mode="grayscale")
+                    image_array = preprocessing.image.img_to_array(img)
+                    image_array = image_array.flatten()/255.0
+                    X.append(image_array)
+                    y.append(classes)
+                    db+=1
         classes+=1
 
     for i in range(numtypes):
@@ -185,7 +188,7 @@ def user_model():
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
 
-    model = RandomForestClassifier(max_depth=20, n_estimators=100)
+    model = RandomForestClassifier(max_depth=8, n_estimators=200)
     model.fit(X_train, y_train)
 
     accuracy = model.score(X_test, y_test)
@@ -216,7 +219,7 @@ def UserModelImageAnalysis():
     prediction = int(np.argmax(pred))
     print('User labels:',userLabels[prediction])
     print('Accuracy',accuracy)
-    if accuracy >= 0.70:
+    if accuracy >= 0.60:
         return jsonify({
             "prediction": prediction,
             "accuracy": accuracy,
@@ -225,7 +228,7 @@ def UserModelImageAnalysis():
     else:
         return jsonify({
             "prediction": 10,
-            "accuracy": 0,
+            "accuracy": accuracy,
             "label": 'Nem biztos'
         })
 
@@ -233,7 +236,6 @@ def UserModelImageAnalysis():
 def image_analyze_result():
     tumor_type = request.args.get('type', type=int)
     accuracy = request.args.get('accuracy',type=float)
-    #1 for meningioma, 2 for glioma, 3 for pituitary tumor
     
     print("Tumor type received:", tumor_type)
     if tumor_type == 0:
@@ -243,7 +245,7 @@ def image_analyze_result():
                         Általában jóindulatú, azonban nagyobb méret elérése esetén életveszélyessé válhat.
                         Leggyakoribb tünetei közé tartozik a fejfájás, valamint a kéz és a láb gyengesége, de az elhelyezkedéstől 
                         függően egyéb neurológiai tünetek is jelentkezhetnek.''',
-            "link": f"http://localhost:5000/pages/{WEBLINKS[tumor_type]}", #"https://orvos24.com/meningioma-tunetek-okok-kezelesek'>https://orvos24.com/meningioma-tunetek-okok-kezelesek",
+            "link": f"http://localhost:5000/pages/{WEBLINKS[tumor_type]}", 
             "accuracy": accuracy,
         }
     elif tumor_type == 1:
@@ -253,7 +255,7 @@ def image_analyze_result():
                         Ezek a sejtek normál esetben az idegsejtek működését segítik.
                         Ez az agydaganatok leggyakoribb típusa.
                         Tünetei sokfélék lehetnek, és leginkább az agyi működés, illetve az idegrendszer működésének megváltozására utalnak.''',
-            "link": f'http://localhost:5000/pages/{WEBLINKS[tumor_type]}', #"https://orvos24.com/a-glioma-tunetei-es-okai",
+            "link": f'http://localhost:5000/pages/{WEBLINKS[tumor_type]}', 
             "accuracy": accuracy,}
     elif tumor_type == 2:
         result = {
@@ -263,7 +265,7 @@ def image_analyze_result():
                         vér- és vizeletvizsgálatok, valamint képalkotó eljárások segítik.
                         Ez a daganattípus nem ad áttétet más szervekbe, azonban
                         a szervezet hormontermelésében változásokat okozhat.''',
-            "link": f'http://localhost:5000/pages/{WEBLINKS[tumor_type]}',#"https://egeszsegvonal.gov.hu/egeszseg-a-z/a-a/agyalapi-mirigy-daganata.html",
+            "link": f'http://localhost:5000/pages/{WEBLINKS[tumor_type]}',
             "accuracy": accuracy,}
     elif tumor_type == 3:    
         result = {
@@ -319,7 +321,6 @@ def websites(filename):
 @app.route('/disease/<int:tumor_type>', methods=['GET'])
 def disease_info(tumor_type):
    
-    # Lekérjük az elérési utat
     file_path = WEBLINKS[tumor_type]
     print(f"Fájl elérési útja: {file_path}")
     

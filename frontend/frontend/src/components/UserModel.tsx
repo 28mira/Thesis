@@ -69,7 +69,7 @@ const UserModel = () => {
   });
   const [showModel, setShowModel] = useState(() => {
     const saved = getLocalStorageWithExpiry("showModel");
-    return saved ? JSON.parse(saved) : false;
+    return saved ?? false;
   });
 
   useEffect(() => {
@@ -115,7 +115,7 @@ const UserModel = () => {
       });
 
       const resp = await response.json();
-      if (resp.classes != 0) setShowModel(true);
+      if (resp.ok && resp.classes != 0) setShowModel(true);
       console.log("Success:", resp);
     } catch (error) {
       console.error("Error", error);
@@ -179,7 +179,7 @@ const UserModel = () => {
               const numtype = Number(e.target.value);
               if (numtype < 4 || numtype > 8) {
                 alert("A típusok száma 4 és 8 között kell legyen!");
-                return "A típusok száma 4 és 8 között kell legyen!";
+                return;
               }
               setNumberOfTypes(numtype);
               setShowDetails(true);
@@ -296,7 +296,7 @@ const UserModel = () => {
                 borderStyle: "solid",
                 borderWidth: 1.5,
               }}
-              disabled={imagesByType.every((images) => images.length === 0)}
+              disabled={imagesByType.some((images) => images.length === 0)}
             >
               Tanítás
             </Button>
