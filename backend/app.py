@@ -1,3 +1,5 @@
+import shutil
+
 from flask import Flask, request, jsonify, send_file, send_from_directory
 from flask_cors import CORS
 import joblib as jl
@@ -9,6 +11,7 @@ import matplotlib.pyplot as plt
 import os
 import cv2
 import torch
+import time
 from monai.networks.nets import UNet
 from tensorflow.keras import preprocessing
 from tensorflow.keras.models import load_model
@@ -17,6 +20,7 @@ from sklearn.metrics import accuracy_score, classification_report
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from PIL import Image
+from werkzeug.utils import secure_filename 
 
 app = Flask(__name__, static_folder='static_folder')
 CORS(app)
@@ -38,6 +42,24 @@ userLabels = []
 
 brainTumorModel = load_model('models/BrainTumorClassificationModel.h5')
 brainTumorHistory = jl.load('models/BrainTumorClassificationHistory.pkl')
+
+def clear_uploads(bool=False):
+    folder = 'uploads'
+    now = time.time()
+    if os.path.exists(folder):
+        for item in os.listdir(folder):
+            item_path = os.path.join(folder, item)
+            if bool:
+                if os.path.isfile(item_path):
+                    os.remove(item_path)
+                elif os.path.isdir(item_path):
+                    shutil.rmtree(item_path)
+            else:
+                if now - os.path.getmtime(item_path) > 10800:  # 3600 = 1 óra, 
+                    if os.path.isfile(item_path):
+                        os.remove(item_path)
+                    elif os.path.isdir(item_path):
+                        shutil.rmtree(item_path)
 
 def prediction (model, X):
     predicted = model.predict(X)
@@ -192,12 +214,62 @@ def user_model():
     model.fit(X_train, y_train)
 
     accuracy = model.score(X_test, y_test)
-    print(f"User model trained with accuracy: {accuracy}")
     userModel = model
-    print(classes)
+
+    clear_uploads(True)
+
     return jsonify({
         "num_classes": classes
     })
+
+@app.route("/api/saveChanges", methods=['POST'])
+def save_change():
+    clear_uploads()
+    type_index = int(request.form.get("type_index"))
+    label = request.form.get("label")
+    
+    folder = os.path.join('uploads', f"type_{type_index}_{label}")
+    
+
+    for i in os.listdir('uploads'):
+        if i.startswith(f"type_{type_index}_"):
+            os.rename(os.path.join('uploads', i), folder)
+
+    os.makedirs(folder, exist_ok=True)
+    
+
+    images = request.files.getlist("images")
+    for image in images:
+        filename = secure_filename(image.filename)
+        image.save(os.path.join(folder, filename))
+    return jsonify({"message": "Changes saved successfully"})
+
+@app.route("/api/loadUserData", methods=['GET'])
+def load_user_data():
+    folder = 'uploads'
+    result = []
+    if not os.path.exists(folder):
+        return jsonify({"message": "No user data found", "data": []})
+    
+    for label in sorted(os.listdir(folder)):
+        label_folder = os.path.join(folder, label)
+        if os.path.isdir(label_folder):
+            label_parts = label.split('_')
+            if len(label_parts) > 2:
+                label_name = '_'.join(label_parts[2:])
+            else:
+                label_name = ""
+
+            images = []
+            for img in os.listdir(label_folder):
+                image_path = f"http://localhost:5000/uploads/{label}/{img}"
+                images.append(image_path)
+            result.append({"label": label_name, "images": images })
+
+    return jsonify({
+        "data": result
+    })
+
 
 @app.route('/api/userupload',methods=['POST'])
 def UserModelImageAnalysis():
@@ -231,6 +303,12 @@ def UserModelImageAnalysis():
             "accuracy": accuracy,
             "label": 'Nem biztos'
         })
+
+@app.route('/api/checkUserModel', methods=['GET'])
+def check_user_model():
+    if userModel is None:
+        return jsonify({"model_loaded": False})
+    return jsonify({"model_loaded": True})
 
 @app.route('/imageAnalyze/result', methods=['GET'])
 def image_analyze_result():
@@ -310,6 +388,10 @@ def image_analyze_result():
 
     return jsonify(result)
 
+@app.route('/uploads/<path:filename>')
+def serve_upload(filename):
+    return send_from_directory('uploads', filename)
+
 @app.route('/image/<path:filename>')
 def serve_image(filename):
     return send_from_directory(app.static_folder, filename)
@@ -330,5 +412,6 @@ def disease_info(tumor_type):
     return send_file(file_path, mimetype='text/html')
 
 if __name__ == '__main__':
+    clear_uploads(True)
     app.run(port=5000,debug=False)
   

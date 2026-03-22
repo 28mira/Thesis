@@ -1,193 +1,180 @@
 #import pandas as pd
 import os
+from xml.parsers.expat import model
 import numpy as np
 import matplotlib.pyplot as plt
-from PIL import Image
 import h5py
 import joblib as jl
 import tensorflow as tf
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, classification_report
-from tensorflow.keras import models, layers, preprocessing, datasets
+from tensorflow.keras import models, layers, preprocessing
 
-def imageGenerator():
-    input_folder = r'C:\Users\marto\Desktop\Szakdolgozat\pogram\brainTumor\data'
-    output_folder = r'C:\Users\marto\Desktop\Szakdolgozat\pogram\brainTumor\converted_data'
-    datas = []
-    img_size = (256,256)
-    for file_name in sorted(os.listdir(input_folder)):
-        if file_name.endswith('.mat'):
-            file_path = os.path.join(input_folder,file_name)
+class ClassificationModel:
+    """Classification model for brain tumor type prediction using CNN."""
+
+    def __init__(self, base_path):
+        """Initialize the classification model.
+
+        Args:
+            base_path (str): Base directory containing dataset folders.
+
+        Attributes:
+            model (tf.keras.Model): The classification model.
+            history (History): Training history object.
+        """
+        self.base_path = base_path
+        self.model = None
+        self.history = None
+
+    def load_from_folder(self, folder, label=None)-> tuple:
+        """Load images from a folder and optionally assign labels.
+
+        Images are resized to 256x256, converted to grayscale,
+        and normalized to [0, 1].
+
+        Args:
+            folder (str): Folder name inside base_path.
+            label (int, optional): Label assigned to all images in the folder.
+
+        Returns:
+            tuple:
+                - X (list of np.ndarray): Loaded image data.
+                - y (list): Corresponding labels (if provided).
+        """
+        input_folder = os.path.join(self.base_path, folder)
+        X = []
+        y = []
+        for file_name in sorted(os.listdir(input_folder)):
+            if file_name.endswith('.jpg') or file_name.endswith('.png'):
+                file_path = os.path.join(input_folder,file_name)
+                
+                img = preprocessing.image.load_img(file_path,target_size=(256, 256),
+                                                    color_mode="grayscale")
+                image_array = preprocessing.image.img_to_array(img)
+                image_array = image_array/255.0
+
+                X.append(image_array)
+
+                if label is not None:
+                    y.append(label)
             
-            with h5py.File(file_path, 'r') as f:
-                image = np.array(f['cjdata/image']).T
-                label = int(np.array(f['cjdata/label'])[0,0])
+        return X, y
     
-            image = image.astype(np.float64)
-            im_norm = 255*(image-image.min())/(image.max()-image.min())
-            im_uint8 = im_norm.astype(np.uint8)
+    def load_labels(self, label_folder)-> tuple:
+        """Load labels from .mat files.
 
-            file_name_base = os.path.splitext(file_name)[0]
-            output_file_path = os.path.join(output_folder,file_name_base + '.jpg')
-    
-            im_pil = Image.fromarray(im_uint8)
-            im_pil = im_pil.resize(img_size)
-            datas.append((np.array(im_pil,dtype=np.float32),label))
-            
-            im_pil.save(output_file_path)
+        The labels are extracted from the dataset and adjusted to zero-based indexing.
 
-def loadLabels():
-    input_folder = r'C:\Users\marto\Desktop\Szakdolgozat\pogram\brainTumor\data'
-    datas = []
-    for file_name in sorted(os.listdir(input_folder)):
-        if file_name.endswith('.mat'):
-            file_path = os.path.join(input_folder,file_name)
-            
-            with h5py.File(file_path, 'r') as f:
-                label = int(np.array(f['cjdata/label'])[0,0])-1
+        Args:
+            label_folder (str): Folder containing label .mat files.
 
-         
-            datas.append((label))
-    return datas
-
-def loadImages():
-    input_folder = r'C:\Users\marto\Desktop\Szakdolgozat\pogram\brainTumor\converted_data'
-    X = []
-    for file_name in sorted(os.listdir(input_folder)):
-            if file_name.endswith('.jpg'):
+        Returns:
+            list: List of integer labels.
+        """
+        input_folder = os.path.join(self.base_path, label_folder )
+        y = []
+        for file_name in sorted(os.listdir(input_folder)):
+            if file_name.endswith('.mat'):
                 file_path = os.path.join(input_folder,file_name)
-                
-                img = preprocessing.image.load_img(file_path,target_size=(256, 256),
-                                                    color_mode="grayscale")
-                image_array = preprocessing.image.img_to_array(img)
-                image_array = image_array/255.0
+                                
+                with h5py.File(file_path, 'r') as f:
+                    label = int(np.array(f['cjdata/label'])[0,0])-1
+                y.append((label))
+        return y
 
-                X.append(image_array)
-    return X
+    def build_model(self)-> models.Sequential:
+        """Build and compile a CNN model for multi-class image classification.
 
-def loadNormalImages(X,y):
-    input_folder = r'C:\Users\marto\Desktop\Szakdolgozat\pogram\brainTumor\Normal'
-    for file_name in sorted(os.listdir(input_folder)):
-            if file_name.endswith('.jpg'):
-                file_path = os.path.join(input_folder,file_name)
-                
-                img = preprocessing.image.load_img(file_path,target_size=(256, 256),
-                                                    color_mode="grayscale")
-                image_array = preprocessing.image.img_to_array(img)
-                image_array = image_array/255.0
+        The model consists of stacked convolutional and max-pooling layers to extract
+        hierarchical spatial features, followed by fully connected layers for classification.
 
-                X.append(image_array)
-                y.append(3)
-    return X,y
+        Design choices:
+            - Conv2D + ReLU: learns spatial features with non-linearity
+            - MaxPooling: reduces spatial dimensions and overfitting
+            - Dense layers: perform final classification based on extracted features
+            - Softmax output: produces class probabilities for 6 categories
 
-def loadStrokeHoImages(X,y):
-    input_folder = r'C:\Users\marto\Desktop\Szakdolgozat\pogram\brainTumor\Stroke_Haemorrhage'
-    for file_name in sorted(os.listdir(input_folder)):
-            if file_name.endswith('.jpg'):
-                file_path = os.path.join(input_folder,file_name)
-                
-                img = preprocessing.image.load_img(file_path,target_size=(256, 256),
-                                                    color_mode="grayscale")
-                image_array = preprocessing.image.img_to_array(img)
-                image_array = image_array/255.0
+        The model is compiled using the Adam optimizer and sparse categorical
+        cross-entropy loss, which is suitable for multi-class classification
+        with integer labels.
 
-                X.append(image_array)
-                y.append(4)
-    return X,y 
+        Returns:
+            tf.keras.Sequential: Compiled CNN model.
+        """
+        model = models.Sequential([
+            layers.Input(shape=(256, 256, 1)),
+            layers.Conv2D(64, (3, 3), activation='relu'),
+            layers.MaxPooling2D(),
+            layers.Conv2D(128, (3, 3), activation='relu'),
+            layers.MaxPooling2D(),
+            layers.Conv2D(64, (3, 3), activation='relu'),
+            layers.MaxPooling2D(),
+            layers.Conv2D(128, (3, 3), activation='relu'),
+            layers.MaxPooling2D(),
+            layers.Conv2D(64, (3, 3), activation='relu'),
+            layers.MaxPooling2D(),
+            layers.Flatten(),
+            layers.Dense(128, activation='relu'),
+            layers.Dense(6,activation='softmax')]) 
 
-def loadStrokeInImages(X,y):
-    input_folder = r'C:\Users\marto\Desktop\Szakdolgozat\pogram\brainTumor\Stroke_infarct'
-    for file_name in sorted(os.listdir(input_folder)):
-            if file_name.endswith('.jpg'):
-                file_path = os.path.join(input_folder,file_name)
-                
-                img = preprocessing.image.load_img(file_path,target_size=(256, 256),
-                                                    color_mode="grayscale")
-                image_array = preprocessing.image.img_to_array(img)
-                image_array = image_array/255.0
+        model.compile(optimizer='adam', loss=tf.keras.losses.SparseCategoricalCrossentropy(), metrics=['accuracy'])
+        self.model = model
+        return model
 
-                X.append(image_array)
-                y.append(5)
-    return np.array(X,dtype="float32"), np.array(y,dtype="int")
+    def train_model(self, X:list, y:list, epochs=30)-> tuple:
+        """Train the classification model.
 
-def cnnModel():
-    model = models.Sequential() 
-    model.add(layers.Input(shape=(256, 256, 1)))
-    model.add(layers.Conv2D(64, (3, 3), activation='relu'))
-    model.add(layers.MaxPooling2D())
-    model.add(layers.Conv2D(128, (3, 3), activation='relu'))
-    model.add(layers.MaxPooling2D())
-    model.add(layers.Conv2D(64, (3, 3), activation='relu'))
-    model.add(layers.MaxPooling2D())
-    model.add(layers.Conv2D(128, (3, 3), activation='relu'))
-    model.add(layers.MaxPooling2D())
-    model.add(layers.Conv2D(64, (3, 3), activation='relu'))
-    model.add(layers.MaxPooling2D())
-    model.add(layers.Conv2D(128, (3, 3), activation='relu'))
-    model.add(layers.MaxPooling2D())
-    model.add(layers.Flatten())
-    model.add(layers.Dense(6,activation='softmax'))
-    return model
+        The dataset is split into training and validation sets.
+        Data augmentation is applied to the training data.
 
-def save_results(model, history, X_test, y_test):
-    model.save('C:/Users/marto/Desktop/Thesis/backend/models/BrainTumorClassificationModel.h5')
-    jl.dump(history,'C:/Users/marto/Desktop/Thesis/backend/models/BrainTumorClassificationHistory.pkl')
-    np.save('C:/Users/marto/Desktop/Thesis/backend/brainTumor_y_test.npy',y_test)
-    np.save('C:/Users/marto/Desktop/Thesis/backend/brainTumor_X_test.npy', X_test)  
+        Args:
+            X (array-like): Input images.
+            y (array-like): Corresponding labels.
+            epochs (int, optional): Number of training epochs.
 
-def aboutModel(model, X_test, y_test):
-    predictions = model.predict(X_test)
-    predicted_classes = np.argmax(predictions, axis=1)
-    print("Pontosság:", accuracy_score(y_test, predicted_classes))
-    print("\n", classification_report(y_test, predicted_classes))
+        Returns:
+            tuple:
+                - history (History): Training history.
+                - X_val (np.ndarray): Validation images.
+                - y_val (np.ndarray): Validation labels.
+        """
+        X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.33, random_state=42)
+        datagen = preprocessing.image.ImageDataGenerator(
+            rotation_range=20,       
+            width_shift_range=0.1,   
+            height_shift_range=0.1,  
+            zoom_range=0.1,          
+            horizontal_flip=True,    
+            fill_mode='nearest'
+        )
+        train_generated = datagen.flow(X_train,y_train,batch_size=32)
 
-def inFigures(history):
-    plt.figure(figsize=(10, 5))
-    plt.plot(history.history['loss'], label='train loss')
-    plt.plot(history.history['val_loss'], label='validation loss')
-    plt.legend()
-    plt.show()
+        if self.model is None:
+            self.build_model()
+        history = self.model.fit(train_generated, epochs=epochs, validation_data=(X_val, y_val))
+        self.history = history
+        return history, X_val, y_val
 
-def predictImages(model, X, y):
-    img = np.expand_dims(X[0],axis=0)
-    pred = model.predict(img)
-    pred_class = np.argmax(pred,axis=1).tolist()
-    pred_prob = np.max(pred)
-    print(f"Predikált osztály: {pred_class}, valószínűség: {pred_prob:.2f}, valós címke: {y[0]}")
-    img = np.expand_dims(X[1],axis=0)
-    pred = model.predict(img)
-    pred_class = np.argmax(pred,axis=1).tolist()
-    pred_prob = np.max(pred)
-    print(f"Predikált osztály: {pred_class}, valószínűség: {pred_prob:.2f}, valós címke: {y[1]}")
+    def save_model(self, file_path, X_val, y_val)-> None:
+        """Save the trained model and related artifacts.
 
-def main():
-    X, y = [], []
-    X, y = loadImages(), loadLabels()
-    X, y = loadNormalImages(X,y)
-    X, y = loadStrokeHoImages(X,y)
-    X, y = loadStrokeInImages(X,y)
-    
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
+        Args:
+            file_path (str): Directory where files will be saved.
+            X_val (np.ndarray): Validation images.
+            y_val (np.ndarray): Validation labels.
+        """
+        if self.model is not None and self.history is not None:
+            self.model.save(os.path.join(file_path, 'BrainTumorClassificationModel.h5'))
+            jl.dump(self.history, os.path.join(file_path, 'BrainTumorClassificationHistory.pkl'))
+            np.save(os.path.join(file_path, 'brainTumor_y_test.npy'), y_val)
+            np.save(os.path.join(file_path, 'brainTumor_X_test.npy'), X_val) 
 
-    datagen = preprocessing.image.ImageDataGenerator(
-    rotation_range=20,       
-    width_shift_range=0.1,   
-    height_shift_range=0.1,  
-    zoom_range=0.1,          
-    horizontal_flip=True,    
-    fill_mode='nearest')
+    def inFigures(self)-> None:
+        """Plot training and validation loss curves."""
+        plt.figure(figsize=(10, 5))
+        plt.plot(self.history.history['loss'], label='train loss')
+        plt.plot(self.history.history['val_loss'], label='validation loss')
+        plt.legend()
+        plt.show()
 
-    train_generated = datagen.flow(X_train,y_train,batch_size=32)
-
-    model = cnnModel()
-
-    model.compile(optimizer='adam', loss=tf.keras.losses.SparseCategoricalCrossentropy(), metrics=['accuracy'])
-    history = model.fit(train_generated, epochs=50, validation_data=(X_test,y_test))
-    
-    save_results(model, history, X_test, y_test)
-    aboutModel(model, X_test, y_test)
-    inFigures(history)
-    predictImages(model, X, y)
-
-if __name__ == "__main__":
-    main()

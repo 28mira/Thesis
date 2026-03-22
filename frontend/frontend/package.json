@@ -12,6 +12,7 @@
   "dependencies": {
     "@mui/x-charts": "^8.9.2",
     "bootstrap": "^5.3.7",
+    "idb-keyval": "^6.2.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-hook-form": "^7.62.0",

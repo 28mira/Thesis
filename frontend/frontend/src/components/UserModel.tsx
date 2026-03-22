@@ -9,91 +9,12 @@ import AddPohotoAlternate from "@mui/icons-material/AddPhotoAlternate";
 import { HideImage } from "@mui/icons-material";
 import { Typography } from "@mui/material";
 
-const storageTime = 60 * 1000 * 30;
-
-function setLocalStorageWithExpiry(key: string, value: any) {
-  const item = {
-    value,
-    expiry: Date.now() + storageTime,
-  };
-  localStorage.setItem(key, JSON.stringify(item));
-}
-
-function getLocalStorageWithExpiry(key: string) {
-  const item = localStorage.getItem(key);
-  if (!item) return null;
-
-  try {
-    const olditem = JSON.parse(item);
-    if (Date.now() > olditem.expiry) {
-      localStorage.removeItem(key);
-      return null;
-    }
-    return olditem.value;
-  } catch {
-    return null;
-  }
-}
-
 const UserModel = () => {
-  const [numberOfTypes, setNumberOfTypes] = useState<number>(() => {
-    const saved = getLocalStorageWithExpiry("numberOfTypes");
-    return saved ? Number(saved) : 0;
-  });
-
-  const [imagesByType, setImagesByType] = useState<any[][]>(() => {
-    try {
-      const saved = getLocalStorageWithExpiry("imagesByType");
-      if (!saved || saved === "undefined") return [];
-      return saved.map((list: any[]) =>
-        list.map((url) => ({ data_url: url, file: null })),
-      );
-    } catch {
-      return [];
-    }
-  });
-
-  const [labelNames, setLabelNames] = useState<string[]>(() => {
-    try {
-      const saved = getLocalStorageWithExpiry("labelNames");
-      if (!saved || saved === "undefined") return [];
-      return saved.map((name: any) => String(name));
-    } catch {
-      return [];
-    }
-  });
-
-  const [showDetails, setShowDetails] = useState(() => {
-    const saved = getLocalStorageWithExpiry("showDetails");
-    return saved ?? false;
-  });
-  const [showModel, setShowModel] = useState(() => {
-    const saved = getLocalStorageWithExpiry("showModel");
-    return saved ?? false;
-  });
-
-  useEffect(() => {
-    setLocalStorageWithExpiry("numberOfTypes", numberOfTypes);
-  }, [numberOfTypes]);
-
-  useEffect(() => {
-    const imagesData = imagesByType.map((list) =>
-      list.map((img: any) => img.data_url),
-    );
-    setLocalStorageWithExpiry("imagesByType", imagesData);
-  }, [imagesByType]);
-
-  useEffect(() => {
-    setLocalStorageWithExpiry("labelNames", labelNames);
-  }, [labelNames]);
-
-  useEffect(() => {
-    setLocalStorageWithExpiry("showDetails", showDetails);
-  }, [showDetails]);
-
-  useEffect(() => {
-    setLocalStorageWithExpiry("showModel", showModel);
-  }, [showModel]);
+  const [numberOfTypes, setNumberOfTypes] = useState<number>(0);
+  const [imagesByType, setImagesByType] = useState<any[][]>([]);
+  const [labelNames, setLabelNames] = useState<string[]>([]);
+  const [showDetails, setShowDetails] = useState(false);
+  const [showModel, setShowModel] = useState(false);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -115,11 +36,71 @@ const UserModel = () => {
       });
 
       const resp = await response.json();
-      if (resp.ok && resp.classes != 0) setShowModel(true);
-      console.log("Success:", resp);
+      if (resp.num_classes > 1) {
+        setShowModel(true);
+        setShowDetails(true);
+      }
     } catch (error) {
       console.error("Error", error);
     }
+  };
+
+  useEffect(() => {
+    async function loadData() {
+      const response = await fetch("http://localhost:5000/api/loadUserData");
+      const data = await response.json();
+      const labels = data.data.map((item: any) => item.label);
+
+      const images = data.data.map((item: any) =>
+        item.images.map((url: string) => ({
+          data_url: url,
+        })),
+      );
+      if (labels.length < 4) {
+        setShowDetails(false);
+      } else {
+        setShowDetails(true);
+      }
+
+      setImagesByType(images);
+      setLabelNames(labels);
+      setNumberOfTypes(labels.length);
+    }
+    loadData();
+  }, []);
+
+  useEffect(() => {
+    async function checkModel() {
+      const response = await fetch("http://localhost:5000/api/checkUserModel");
+      const data = await response.json();
+      if (data.model_loaded) {
+        setShowModel(true);
+      } else {
+        setShowModel(false);
+      }
+    }
+    checkModel();
+  });
+
+  const saveChange = async (
+    index: number,
+    images: any[],
+    label: string,
+    numTypes: number,
+  ) => {
+    const formData = new FormData();
+    formData.append("type_index", index.toString());
+    formData.append("label", label);
+    formData.append("numtypes", numTypes.toString());
+    images.forEach((image) => {
+      if (image.file) formData.append(`images`, image.file);
+      else console.warn(`Hiányzó fájl a tesztelésnél`);
+    });
+
+    await fetch("http://localhost:5000/api/saveChanges", {
+      method: "POST",
+      body: formData,
+    });
   };
 
   return (
@@ -172,7 +153,6 @@ const UserModel = () => {
             value={numberOfTypes || ""}
             name="numtyp"
             id="numtyp"
-            width={5}
             max={8}
             min={4}
             onChange={(e) => {
@@ -182,9 +162,9 @@ const UserModel = () => {
                 return;
               }
               setNumberOfTypes(numtype);
-              setShowDetails(true);
               setImagesByType(Array.from({ length: numtype }, () => []));
               setLabelNames(Array.from({ length: numtype }, () => ""));
+              if (numtype >= 4 && numtype <= 8) setShowDetails(true);
             }}
           />
         </Box>
@@ -212,6 +192,12 @@ const UserModel = () => {
                     setImagesByType((prevImagesByType) => {
                       const newImagesByType = [...prevImagesByType];
                       newImagesByType[index] = imageList;
+                      saveChange(
+                        index,
+                        imageList,
+                        labelNames[index] ?? "",
+                        numberOfTypes,
+                      );
                       return newImagesByType;
                     });
                   }}
@@ -236,6 +222,14 @@ const UserModel = () => {
                           newLabels[index] = e.target.value;
                           setLabelNames(newLabels);
                         }}
+                        onBlur={() =>
+                          saveChange(
+                            index,
+                            imagesByType[index],
+                            labelNames[index] ?? "",
+                            numberOfTypes,
+                          )
+                        }
                         style={{
                           marginLeft: 10,
                           height: 34,
