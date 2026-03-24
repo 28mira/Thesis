@@ -1,5 +1,4 @@
 import shutil
-
 from flask import Flask, request, jsonify, send_file, send_from_directory
 from flask_cors import CORS
 import joblib as jl
@@ -22,28 +21,38 @@ from sklearn.model_selection import train_test_split
 from PIL import Image
 from werkzeug.utils import secure_filename 
 
+# Initialization of the Flask application and CORS configuration
 app = Flask(__name__, static_folder='static_folder')
 CORS(app)
 
+#Mapping predicted classes to informational web pages
 WEBLINKS = {
         0: 'meningioma/meningioma.html',
         1: 'glioma/glioma.html',
         2: 'amd/amd.html',
-        3: '',
         4: 'agyverzes/agyverzes.html', 
         5: 'agyinfarktus/AgyiInfarktus.html' 
     }
 
+# Load test data and pre-trained model for classification
 y_test = np.load('brainTumor_y_test.npy',allow_pickle=True)
 X_test = np.load('brainTumor_X_test.npy',allow_pickle=True)
 
+#Global variables for user model and labels
 userModel = None
 userLabels = []
 
+# Load pre-trained classification model and its training history
 brainTumorModel = load_model('models/BrainTumorClassificationModel.h5')
 brainTumorHistory = jl.load('models/BrainTumorClassificationHistory.pkl')
 
 def clear_uploads(bool=False):
+    """
+    Removes uploaded files and folders.
+    
+    If bool=True → full cleanup.
+    If bool=False → removes only files older than 3 hours.
+    """
     folder = 'uploads'
     now = time.time()
     if os.path.exists(folder):
@@ -62,6 +71,10 @@ def clear_uploads(bool=False):
                         shutil.rmtree(item_path)
 
 def prediction (model, X):
+    """
+    Runs prediction on the given model.
+    Returns raw probability outputs.
+    """
     predicted = model.predict(X)
     return predicted
 
@@ -71,7 +84,6 @@ def predicted_classes(model,X):
 def model_classification_report(model, X, y):
     report = classification_report(y,predicted_classes(model,X),output_dict=True)
     return report
-
 
 @app.route('/model1/prediction')
 def model1_prediction():
@@ -93,6 +105,10 @@ def summary():
 
 @app.route('/api/upload', methods=['POST'])
 def upload_file():
+    """
+    Handles image upload and performs classification.
+    If tumor is detected, segmentation is also applied.
+    """
     static_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static_folder')
     os.makedirs(app.static_folder, exist_ok=True)
 
@@ -160,6 +176,10 @@ def upload_file():
 
 @app.route('/api/userModel', methods=['POST'])
 def user_model():
+    """
+    Handles image upload and performs classification.
+    If tumor is detected, segmentation is also applied.
+    """
     global userModel
     global userLabels
     userLabels = ['egészséges']
@@ -224,6 +244,10 @@ def user_model():
 
 @app.route("/api/saveChanges", methods=['POST'])
 def save_change():
+    """
+    Saves images and label updates for a specific class.
+    Handles folder renaming dynamically based on label changes.
+    """
     clear_uploads()
     type_index = int(request.form.get("type_index"))
     label = request.form.get("label")
@@ -246,6 +270,10 @@ def save_change():
 
 @app.route("/api/loadUserData", methods=['GET'])
 def load_user_data():
+    """
+    Loads saved user data (labels + image paths) from uploads directory.
+    Used to restore frontend state.
+    """
     folder = 'uploads'
     result = []
     if not os.path.exists(folder):
@@ -270,9 +298,12 @@ def load_user_data():
         "data": result
     })
 
-
 @app.route('/api/userupload',methods=['POST'])
 def UserModelImageAnalysis():
+    """
+    Runs prediction using the user-trained model.
+    Returns predicted label and confidence.
+    """
     global userModel
     global userLabels
     img_size = (128,128)
@@ -306,6 +337,9 @@ def UserModelImageAnalysis():
 
 @app.route('/api/checkUserModel', methods=['GET'])
 def check_user_model():
+    """
+    Checks whether a user-trained model is currently available in memory.
+    """
     if userModel is None:
         return jsonify({"model_loaded": False})
     return jsonify({"model_loaded": True})
@@ -349,7 +383,7 @@ def image_analyze_result():
         result = {
             "label": 'Egészséges kép',
             "content": '''A feltöltött képen nem található kimutatható elváltozás vagy daganat.''',
-            "link": f'http://localhost:5000/pages/{WEBLINKS[tumor_type]}',
+            "link": '',
             "accuracy": accuracy,}
     elif tumor_type == 4:    
         result = {
@@ -412,6 +446,10 @@ def disease_info(tumor_type):
     return send_file(file_path, mimetype='text/html')
 
 if __name__ == '__main__':
+    """
+    Ensure no stale uploaded data remains on server start
+        and run the Flask application.
+    """
     clear_uploads(True)
     app.run(port=5000,debug=False)
   

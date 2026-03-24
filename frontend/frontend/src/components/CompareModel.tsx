@@ -37,6 +37,7 @@ const CompareModel = () => {
         display: { xs: "block", md: "flex" },
         flexDirection: "row",
         width: "100%",
+        height: "min-content",
         paddingBottom: 2,
       }}
     >
@@ -47,8 +48,6 @@ const CompareModel = () => {
           height: "min-content",
           backgroundColor: "primary.main",
           color: "primary.contrastText",
-          maxHeight: 750,
-          minHeight: 750,
           padding: 1,
           margin: 1,
           borderRadius: 10,
@@ -88,6 +87,7 @@ const CompareModel = () => {
           <img
             src="/web_img.png"
             alt="A modell és az eredeti elváltozás"
+            width="65%"
             style={{ borderRadius: 15 }}
           />
         </Box>

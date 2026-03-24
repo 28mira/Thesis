@@ -42,6 +42,7 @@ const Model1 = () => {
         display: { xs: "block", md: "flex" },
         flexDirection: "row",
         width: "75%",
+        height: "min-content",
         paddingBottom: 2,
       }}
     >
@@ -52,8 +53,6 @@ const Model1 = () => {
           height: "min-content",
           backgroundColor: "info.main",
           color: "info.contrastText",
-          maxHeight: 750,
-          minHeight: 750,
           padding: 1,
           margin: 1,
           borderRadius: 10,

@@ -1,7 +1,23 @@
+import os
 import numpy as np
 from classification_model import ClassificationModel
 from segmentation_model import SegmentationModel
 import argparse
+
+def check_folder(folder_path:str, folders:list)-> bool:
+    """Check if a folder exists and create it if it doesn't.
+
+    Args:
+        folder_path (str): Path to the folder to check or create.
+        folders (list): List of subfolders to check or create.
+    """
+    for folder in folders:
+        path = os.path.join(folder_path, folder)
+        if not os.path.exists(path):
+            return False
+        
+        
+    return True
 
 def main(base_path:str, save_path:str )-> None:
     """Run classification and segmentation training pipelines.
@@ -15,18 +31,16 @@ def main(base_path:str, save_path:str )-> None:
     classification_model = ClassificationModel(base_path)
     segmentation_model = SegmentationModel(base_path)
     
-    X, _ = classification_model.load_from_folder('converted_data', label=None)
-    y  = classification_model.load_labels('data')
-    X_load,y_load = classification_model.load_from_folder('Normal', label=len(set(y))) 
-    X += X_load
-    y += y_load  
-    X_load,y_load = classification_model.load_from_folder('Stroke_Haemorrhage', label=len(set(y)))    
-    X += X_load
-    y += y_load  
-    X_load,y_load = classification_model.load_from_folder('Stroke_infarct', label=len(set(y)))    
-    X += X_load
-    y += y_load  
-
+    folders = ['converted_data', 'data','Normal', 'Stroke_Haemorrhage', 'Stroke_infarct']
+    if not check_folder(base_path, folders):
+        raise FileNotFoundError(f"One or more required folders are missing in the base path: {folders}")
+    else:
+        X, _ = classification_model.load_from_folder('converted_data', label=None)
+        y  = classification_model.load_labels('data')
+        for folder in folders[2::]:
+            X_load,y_load = classification_model.load_from_folder(folder, label=len(set(y)))
+            X += X_load
+            y += y_load
     classification_model.model = classification_model.build_model()
     classification_model.history, X_val, y_val = classification_model.train_model(np.array(X), np.array(y))
     classification_model.save_model(save_path, X_val, y_val)

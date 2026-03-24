@@ -124,3 +124,4 @@ class SegmentationModel:
             save_path (str): Directory where the model will be saved.
         """
         torch.save(self.model.state_dict(), os.path.join(save_path, 'unet_model.pth'))
+        print(f"Model saved to")
