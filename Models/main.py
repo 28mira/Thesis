@@ -44,13 +44,13 @@ def main(base_path:str, save_path:str )-> None:
     classification_model.model = classification_model.build_model()
     classification_model.history, X_val, y_val = classification_model.train_model(np.array(X), np.array(y))
     classification_model.save_model(save_path, X_val, y_val)
-    classification_model.inFigures()
+    classification_model.diagram()
 
     images, masks = segmentation_model.load_image_and_mask()
     segmentation_model.model = segmentation_model.build_unet_model()
     datas = list(zip(images, masks))
-    segmentation_model.modleEpochs(datas, images, masks)
-    segmentation_model.saveModel(save_path)
+    segmentation_model.model_epochs(datas, images, masks)
+    segmentation_model.save_model(save_path)
 
    
 if __name__ == "__main__":

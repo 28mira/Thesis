@@ -449,7 +449,7 @@ if __name__ == '__main__':
     """
     Ensure no stale uploaded data remains on server start
         and run the Flask application.
-    """
+    """ 
     clear_uploads(True)
     app.run(port=5000,debug=False)
   

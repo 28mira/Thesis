@@ -13,7 +13,7 @@ from tensorflow.keras import models, layers, preprocessing
 class ClassificationModel:
     """Classification model for brain tumor type prediction using CNN."""
 
-    def __init__(self, base_path):
+    def __init__(self, base_path: str):
         """Initialize the classification model.
 
         Args:
@@ -27,7 +27,7 @@ class ClassificationModel:
         self.model = None
         self.history = None
 
-    def load_from_folder(self, folder, label=None)-> tuple:
+    def load_from_folder(self, folder: str, label=None)-> tuple:
         """Load images from a folder and optionally assign labels.
 
         Images are resized to 256x256, converted to grayscale,
@@ -61,7 +61,7 @@ class ClassificationModel:
             
         return X, y
     
-    def load_labels(self, label_folder)-> tuple:
+    def load_labels(self, label_folder: str)-> tuple:
         """Load labels from .mat files.
 
         The labels are extracted from the dataset and adjusted to zero-based indexing.
@@ -156,7 +156,7 @@ class ClassificationModel:
         self.history = history
         return history, X_val, y_val
 
-    def save_model(self, file_path, X_val, y_val)-> None:
+    def save_model(self, file_path: str, X_val: np.ndarray, y_val: np.ndarray)-> None:
         """Save the trained model and related artifacts.
 
         Args:
@@ -170,7 +170,7 @@ class ClassificationModel:
             np.save(os.path.join(file_path, 'brainTumor_y_test.npy'), y_val)
             np.save(os.path.join(file_path, 'brainTumor_X_test.npy'), X_val) 
 
-    def inFigures(self)-> None:
+    def diagram(self)-> None:
         """Plot training and validation loss curves."""
         plt.figure(figsize=(10, 5))
         plt.plot(self.history.history['loss'], label='train loss')

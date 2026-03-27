@@ -85,7 +85,7 @@ class SegmentationModel:
 
         return self.model
 
-    def modleEpochs(self, datas:tuple, images:list, masks:list)-> None:
+    def model_epochs(self, datas:tuple, images:list, masks:list)-> None:
         """Train the model for a fixed number of epochs.
 
         The dataset is split into training and validation subsets.
@@ -117,11 +117,10 @@ class SegmentationModel:
                 optimizer.step()
                 epoch_loss += loss.item()
 
-    def saveModel(self,save_path:str)-> None:
+    def save_model(self,save_path:str)-> None:
         """Save the trained model weights.
 
         Args:
             save_path (str): Directory where the model will be saved.
         """
         torch.save(self.model.state_dict(), os.path.join(save_path, 'unet_model.pth'))
-        print(f"Model saved to")
