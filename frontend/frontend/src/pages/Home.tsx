@@ -3,7 +3,7 @@ import Box from "@mui/material/Box";
 import ImageAnalysis from "../components/ImageAnalysis";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import Model1 from "../components/Model1";
+import Model1 from "../components/Model";
 
 const Home = () => {
   return (

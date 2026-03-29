@@ -1,36 +1,6 @@
-import { useState, useEffect } from "react";
-import { Box, Typography, Stack } from "@mui/material";
-import { RadarChart } from "@mui/x-charts";
-import { Padding } from "@mui/icons-material";
+import { Box, Typography } from "@mui/material";
 
 const CompareModel = () => {
-  const [modelData, setModelData] = useState({
-    accuracy: null,
-    loss: null,
-    val_loss: null,
-    precision: null,
-    recall: null,
-    f1_score: null,
-    confusion_matrix: null,
-  });
-
-  useEffect(() => {
-    fetch("http://localhost:5000/model1/summary")
-      .then((response) => response.json())
-      .then((data) => {
-        setModelData({
-          accuracy: data.accuracy,
-          loss: data.loss,
-          val_loss: data.val_loss,
-          precision: data.precision,
-          recall: data.recall,
-          f1_score: data.f1_score,
-          confusion_matrix: data.confusion_matrix,
-        });
-      })
-      .catch((error) => console.error("Error fetching message:", error));
-  }, []);
-
   return (
     <Box
       sx={{

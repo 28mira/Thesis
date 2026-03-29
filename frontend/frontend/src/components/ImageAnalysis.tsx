@@ -8,7 +8,7 @@ import AddPohotoAlternate from "@mui/icons-material/AddPhotoAlternate";
 import { HideImage } from "@mui/icons-material";
 import { useState } from "react";
 import { useEffect } from "react";
-import { Card, createTheme, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 
 async function handleOnChange(image: any) {
   let tumortype = 0;
@@ -17,7 +17,7 @@ async function handleOnChange(image: any) {
   try {
     const formData = new FormData();
     formData.append("image", image.file);
-    const response = await fetch("http://localhost:5000/api/upload", {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/upload`, {
       method: "POST",
       body: formData,
     });
@@ -50,7 +50,7 @@ const ImageAnalysis = () => {
 
   useEffect(() => {
     fetch(
-      `http://localhost:5000/imageAnalyze/result?type=${tumorType}&accuracy=${accuracy}`,
+      `${import.meta.env.VITE_API_URL}/imageAnalyze/result?type=${tumorType}&accuracy=${accuracy}`,
     )
       .then((response) => response.json())
       .then((data) => {

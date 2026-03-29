@@ -1,7 +1,5 @@
-import Introduction from "../components/Introduction";
 import Box from "@mui/material/Box";
 import Header from "../components/Header";
-import Footer from "../components/Footer";
 import UserModel from "../components/UserModel";
 import UserModelIntro from "../components/UserModelIntro";
 

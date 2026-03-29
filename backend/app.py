@@ -165,7 +165,7 @@ def upload_file():
         return jsonify({'message': 'Image received successfully', 
                         'prediction': pred_class,
                         'accuracy': pred_prob,
-                        'result_image': f'http://localhost:5000/image/result.jpg' if pred_class <= 2 else None
+                        'result_image': f'{request.url_root}image/result.jpg' if pred_class <= 2 else None
                         })
     else:
         return jsonify({'message': 'Image received successfully', 

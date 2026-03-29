@@ -23,17 +23,20 @@ const UserModel = () => {
 
       imagesByType.forEach((images, typeIndex) => {
         formData.append(`label_${typeIndex}`, labelNames[typeIndex]);
-        images.forEach((image, imageIndex) => {
+        images.forEach((image) => {
           if (image.file) formData.append(`type_${typeIndex}`, image.file);
           else console.warn(`Hiányzó fájl a ${typeIndex}. típusnál`);
         });
       });
       formData.append("numtypes", numberOfTypes.toString());
 
-      const response = await fetch("http://localhost:5000/api/userModel", {
-        method: "POST",
-        body: formData,
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/userModel`,
+        {
+          method: "POST",
+          body: formData,
+        },
+      );
 
       const resp = await response.json();
       if (resp.num_classes > 1) {
@@ -47,7 +50,9 @@ const UserModel = () => {
 
   useEffect(() => {
     async function loadData() {
-      const response = await fetch("http://localhost:5000/api/loadUserData");
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/loadUserData`,
+      );
       const data = await response.json();
       const labels = data.data.map((item: any) => item.label);
 
@@ -71,7 +76,9 @@ const UserModel = () => {
 
   useEffect(() => {
     async function checkModel() {
-      const response = await fetch("http://localhost:5000/api/checkUserModel");
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/checkUserModel`,
+      );
       const data = await response.json();
       if (data.model_loaded) {
         setShowModel(true);
@@ -97,7 +104,7 @@ const UserModel = () => {
       else console.warn(`Hiányzó fájl a tesztelésnél`);
     });
 
-    await fetch("http://localhost:5000/api/saveChanges", {
+    await fetch(`${import.meta.env.VITE_API_URL}/api/saveChanges`, {
       method: "POST",
       body: formData,
     });

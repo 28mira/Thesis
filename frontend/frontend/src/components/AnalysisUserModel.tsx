@@ -5,10 +5,9 @@ import React from "react";
 import FileUploadIcon from "@mui/icons-material/FileUpload";
 import ImageUploading from "react-images-uploading";
 import AddPohotoAlternate from "@mui/icons-material/AddPhotoAlternate";
-import { HideImage, Padding } from "@mui/icons-material";
+import { HideImage } from "@mui/icons-material";
 import { useState } from "react";
-import { useEffect } from "react";
-import { Card, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 
 const ImageAnalysis = () => {
   const [image, setImage] = React.useState([]);
@@ -26,10 +25,13 @@ const ImageAnalysis = () => {
     try {
       const formData = new FormData();
       formData.append("image", image.file);
-      const response = await fetch("http://localhost:5000/api/userupload", {
-        method: "POST",
-        body: formData,
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/userupload`,
+        {
+          method: "POST",
+          body: formData,
+        },
+      );
 
       const resp = await response.json();
       console.log("Success:", resp);

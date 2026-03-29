@@ -1,11 +1,10 @@
 import { useState, useEffect } from "react";
-import { Typography, Stack, Box } from "@mui/material";
+import { Typography, Box } from "@mui/material";
 import { RadarChart } from "@mui/x-charts/RadarChart";
-import { useTheme } from "@mui/material/styles";
 import CompareModel from "./CompareModel";
 
 const Model1 = () => {
-  const stripeColor = (index: number) => {
+  const stripeColor = () => {
     return "#003049";
   };
 
@@ -20,7 +19,7 @@ const Model1 = () => {
   });
 
   useEffect(() => {
-    fetch("http://localhost:5000/model1/summary")
+    fetch(`${import.meta.env.VITE_API_URL}/model1/summary`)
       .then((response) => response.json())
       .then((data) => {
         setModelData({
