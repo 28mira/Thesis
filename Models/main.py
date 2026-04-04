@@ -1,7 +1,7 @@
 import os
 import numpy as np
-from Models.classification_modell import ClassificationModel
-from Models.segmentation_modell import SegmentationModel
+from Models.classification_model import ClassificationModel
+from Models.segmentation_model import SegmentationModel
 import argparse
 
 def check_folder(folder_path:str, folders:list)-> bool:
