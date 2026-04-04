@@ -5,7 +5,7 @@ from segmentation_model import SegmentationModel
 import argparse
 
 def check_folder(folder_path:str, folders:list)-> bool:
-    """Check if a folder exists and create it if it doesn't.
+    """Check if a folder exists.
 
     Args:
         folder_path (str): Path to the folder to check or create.

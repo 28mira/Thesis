@@ -46,25 +46,25 @@ userLabels = []
 brainTumorModel = load_model('models/BrainTumorClassificationModel.h5')
 brainTumorHistory = jl.load('models/BrainTumorClassificationHistory.pkl')
 
-def clear_uploads(bool=False):
+def clear_uploads(notEmpty=False):
     """
     Removes uploaded files and folders.
     
-    If bool=True → full cleanup.
-    If bool=False → removes only files older than 3 hours.
+    If notEmpty=True → full cleanup.
+    If notEmpty=False → removes only files older than 3 hours.
     """
     folder = 'uploads'
     now = time.time()
     if os.path.exists(folder):
         for item in os.listdir(folder):
             item_path = os.path.join(folder, item)
-            if bool:
+            if notEmpty:
                 if os.path.isfile(item_path):
                     os.remove(item_path)
                 elif os.path.isdir(item_path):
                     shutil.rmtree(item_path)
             else:
-                if now - os.path.getmtime(item_path) > 10800:  # 3600 = 1 óra, 
+                if now - os.path.getmtime(item_path) > 10800:  # 3600 = 1 hour, 
                     if os.path.isfile(item_path):
                         os.remove(item_path)
                     elif os.path.isdir(item_path):
@@ -290,7 +290,7 @@ def load_user_data():
 
             images = []
             for img in os.listdir(label_folder):
-                image_path = f"http://localhost:5000/uploads/{label}/{img}"
+                image_path = f"{request.url_root}/uploads/{label}/{img}"
                 images.append(image_path)
             result.append({"label": label_name, "images": images })
 
@@ -357,7 +357,7 @@ def image_analyze_result():
                         Általában jóindulatú, azonban nagyobb méret elérése esetén életveszélyessé válhat.
                         Leggyakoribb tünetei közé tartozik a fejfájás, valamint a kéz és a láb gyengesége, de az elhelyezkedéstől 
                         függően egyéb neurológiai tünetek is jelentkezhetnek.''',
-            "link": f"http://localhost:5000/pages/{WEBLINKS[tumor_type]}", 
+            "link": f"{request.url_root}/pages/{WEBLINKS[tumor_type]}", 
             "accuracy": accuracy,
         }
     elif tumor_type == 1:
@@ -367,7 +367,7 @@ def image_analyze_result():
                         Ezek a sejtek normál esetben az idegsejtek működését segítik.
                         Ez az agydaganatok leggyakoribb típusa.
                         Tünetei sokfélék lehetnek, és leginkább az agyi működés, illetve az idegrendszer működésének megváltozására utalnak.''',
-            "link": f'http://localhost:5000/pages/{WEBLINKS[tumor_type]}', 
+            "link": f'{request.url_root}/pages/{WEBLINKS[tumor_type]}', 
             "accuracy": accuracy,}
     elif tumor_type == 2:
         result = {
@@ -377,7 +377,7 @@ def image_analyze_result():
                         vér- és vizeletvizsgálatok, valamint képalkotó eljárások segítik.
                         Ez a daganattípus nem ad áttétet más szervekbe, azonban
                         a szervezet hormontermelésében változásokat okozhat.''',
-            "link": f'http://localhost:5000/pages/{WEBLINKS[tumor_type]}',
+            "link": f'{request.url_root}/pages/{WEBLINKS[tumor_type]}',
             "accuracy": accuracy,}
     elif tumor_type == 3:    
         result = {
@@ -397,7 +397,7 @@ def image_analyze_result():
                         Gyakori tünetei közé tartozik az erős fejfájás, szédülés, beszédzavar vagy a beszéd megértésének nehézsége, valamint az arc, 
                         a kar vagy a láb egyik oldalának gyengesége. Ha ezek közül bármelyik tünet jelentkezik, haladéktalanul hívja a mentőket.'''
                         ,
-            "link": f'http://localhost:5000/pages/{WEBLINKS[tumor_type]}',
+            "link": f'{request.url_root}/pages/{WEBLINKS[tumor_type]}',
             "accuracy": accuracy,}
     elif tumor_type == 5:    
         result = {
@@ -409,7 +409,7 @@ def image_analyze_result():
                         kezdenek. Leggyakoribb tünetei közé tartozik a beszédzavar, az arc, a kar vagy a láb egyik oldalának gyengesége vagy bénulása. 
                         Amennyiben ilyen tüneteket észlel valakin, azonnal hívja a mentőket, és lehetőség szerint jegyezze fel, mikor jelentkeztek 
                         először a tünetek, mert ez kulcsfontosságú az ellátás szempontjából.''',
-            "link": f'http://localhost:5000/pages/{WEBLINKS[tumor_type]}',
+            "link": f'{request.url_root}/pages/{WEBLINKS[tumor_type]}',
             "accuracy": accuracy,}
     else:
         result = {

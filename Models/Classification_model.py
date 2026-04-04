@@ -72,7 +72,7 @@ class ClassificationModel:
         Returns:
             list: List of integer labels.
         """
-        input_folder = os.path.join(self.base_path, label_folder )
+        input_folder = os.path.join(self.base_path, label_folder)
         y = []
         for file_name in sorted(os.listdir(input_folder)):
             if file_name.endswith('.mat'):
