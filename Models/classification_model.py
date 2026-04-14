@@ -101,6 +101,9 @@ class ClassificationModel:
 
         Returns:
             tf.keras.Sequential: Compiled CNN model.
+
+        This model is based on a simplified version of a CNN architecture that we studied during our Python course at university.
+        The original concept was extended and adapted here for brain tumor classification tasks.
         """
         model = models.Sequential([
             layers.Input(shape=(256, 256, 1)),

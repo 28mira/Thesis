@@ -299,7 +299,7 @@ def load_user_data():
     })
 
 @app.route('/api/userupload',methods=['POST'])
-def UserModelImageAnalysis():
+def user_model_image_analysis():
     """
     Runs prediction using the user-trained model.
     Returns predicted label and confidence.
