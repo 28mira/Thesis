@@ -1,7 +1,7 @@
 import os
 import numpy as np
-from Models.classification_model import ClassificationModel
-from Models.segmentation_model import SegmentationModel
+from classification_model import ClassificationModel
+from segmentation_model import SegmentationModel
 import argparse
 
 def check_folder(folder_path:str, folders:list)-> bool:
@@ -43,14 +43,14 @@ def main(base_path:str, save_path:str )-> None:
             y += y_load
     classification_model.model = classification_model.build_model()
     classification_model.history, X_val, y_val = classification_model.train_model(np.array(X), np.array(y))
-    classification_model.save_model(save_path, X_val, y_val)
-    classification_model.diagram()
+    #classification_model.save_model(save_path, X_val, y_val)
+    #classification_model.diagram()
 
     images, masks = segmentation_model.load_image_and_mask()
     segmentation_model.model = segmentation_model.build_unet_model()
     datas = list(zip(images, masks))
     segmentation_model.model_epochs(datas, images, masks)
-    segmentation_model.save_model(save_path)
+    #segmentation_model.save_model(save_path)
 
    
 if __name__ == "__main__":

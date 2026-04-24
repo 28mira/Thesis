@@ -34,17 +34,9 @@ WEBLINKS = {
         5: 'agyinfarktus/AgyiInfarktus.html' 
     }
 
-# Load test data and pre-trained model for classification
-y_test = np.load('brainTumor_y_test.npy',allow_pickle=True)
-X_test = np.load('brainTumor_X_test.npy',allow_pickle=True)
-
 #Global variables for user model and labels
 userModel = None
 userLabels = []
-
-# Load pre-trained classification model and its training history
-brainTumorModel = load_model('models/BrainTumorClassificationModel.h5')
-brainTumorHistory = jl.load('models/BrainTumorClassificationHistory.pkl')
 
 def clear_uploads(notEmpty=False):
     """
@@ -446,6 +438,15 @@ def disease_info(tumor_type):
     return send_file(file_path, mimetype='text/html')
 
 if __name__ == '__main__':
+    # Load test data and pre-trained model for classification
+    y_test = np.load('brainTumor_y_test.npy',allow_pickle=True)
+    X_test = np.load('brainTumor_X_test.npy',allow_pickle=True)
+
+
+    # Load pre-trained classification model and its training history
+    brainTumorModel = load_model('models/BrainTumorClassificationModel.h5')
+    brainTumorHistory = jl.load('models/BrainTumorClassificationHistory.pkl')
+
     """
     Ensure no stale uploaded data remains on server start
         and run the Flask application.
