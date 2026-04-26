@@ -159,7 +159,7 @@ const ImageAnalysis = () => {
             Eredmény:
           </Typography>
           <Typography sx={{}}>
-            A feltöltött kép {accuracy} valószínúséggel egy {label}
+            A feltöltött kép {accuracy} valószínűséggel egy {label}
           </Typography>
         </Box>
       )}

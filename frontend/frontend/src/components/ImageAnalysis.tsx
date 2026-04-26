@@ -242,7 +242,7 @@ const ImageAnalysis = () => {
                     rel="noopener noreferrer"
                     style={{ color: "#669bbc" }}
                   >
-                    <Typography>Ide kettintva tudsz tovább olvasni</Typography>
+                    <Typography>Ide kattintva tudsz tovább olvasni</Typography>
                   </a>
                 </Box>
               )}
