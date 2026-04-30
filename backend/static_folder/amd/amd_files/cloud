@@ -1,0 +1,53 @@
+//<script>
+if (typeof perfectchat_dontstart === 'undefined') {
+    var perfectchat_dontstart = false;
+
+    if (window.top !== window.self) {
+        window.addEventListener('message', function (e) {
+            if (e.data === 'perfectchat-hide') {
+                perfectchat_dontstart = true;
+                if (typeof perfectchat != 'undefined') {
+                    perfectchat.stopchat();
+                }
+            }
+        });
+        window.parent.postMessage('perfectchat-loaded', '*');
+    }
+    var perfectchat_inited = false;
+    function perfectchatinit() {
+        if (perfectchat_inited) {
+            return false;
+        }
+        if (perfectchat_dontstart) {
+            console.log('[PerfectChat] Preventing start in perfectchatinit');
+            return false;
+        }
+        perfectchat_inited = true;
+        cont = document.createElement('div');
+        cont.setAttribute('id', 'perfectchatcontainer');
+        cont.setAttribute('data-scriptversion', '1.0.325');
+        cont.setAttribute('data-protocol', 'https:');
+        cont.setAttribute('data-scriptdomain', 'chatrobot-nnk.mia.gov.hu');
+        cont.setAttribute('data-accountuid', 'lgbatu2bkkvhtze5ywmqnz1mohsnthsy');
+        cont.setAttribute('data-cookieuid', 'wj4lqr59vmjlspnpv1ai6dgm4jb90gcl');
+                                                                cont.setAttribute('data-websockethost', '*');
+                document.getElementsByTagName('body')[0].appendChild(cont);
+        delete cont;
+
+        script = document.createElement('script');
+        script.setAttribute('id', 'perfectchatscript');
+        script.setAttribute('type', 'text/javascript');
+        script.setAttribute('src', 'https://chatrobot-nnk.mia.gov.hu/js/client.js?id=515e08b9a526cfd55794');
+        document.getElementsByTagName('head')[0].appendChild(script);
+        delete script;
+    }
+    try {
+        if(document.readyState === "complete" || document.readyState === "interactive") {
+            perfectchatinit();
+        } else {
+            document.addEventListener("DOMContentLoaded", perfectchatinit);
+        }
+    } catch (e) {
+        console.log(e);
+    }
+}
