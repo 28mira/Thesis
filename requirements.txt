@@ -1,0 +1,13 @@
+pandas
+numpy
+matplotlib 
+flask
+flask-cors
+Pillow
+h5py
+torchvision
+tensorflow
+tensorflow.keras
+scikit-learn
+monai
+opencv-python

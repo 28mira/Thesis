@@ -1,0 +1,66 @@
+(function($){'use strict'
+function main(e,data){window.jnews.paywall=window.jnews.paywall||{}
+window.jnews.paywall={init:function(){var base=this
+base.container=$('body')
+base.user_login=base.container.hasClass('logged-in')
+base.form_login=base.container.find('.jeg_accountlink')
+base.xhr=null
+base.login_button=base.container.find('.jpw_login a')
+base.package_item_button=base.container.find('.jpw-wrapper .package-item .button')
+base.path=(jnewsoption.site_slug===undefined)?'/':jnewsoption.site_slug
+base.domain=(jnewsoption.site_domain===undefined)?window.location.hostname:jnewsoption.site_domain
+base.set_event()
+base.set_after_checkout()
+document.cookie='paywall_product = false; path = '+base.path+'; domain = '+base.domain+'; secure'},set_event:function(){var base=this
+base.container.find('.jeg_paywall_unlock_post').off('click').on('click',function(e){base.post_id=$(this).data('id')
+base.open_form(e,'#jpw_unlock_popup')})
+base.container.find('#jpw_unlock_popup .btn.yes').off('click').on('click',function(e){e.preventDefault()
+e.stopPropagation()
+var $element=$(this),ajax_data={unlock_post_id:'1',action:'paywall_handler',post_id:base.post_id}
+$element.find('.fa-spinner').show();$element.find('span').hide();if(base.xhr!==null){base.xhr.abort()}
+base.paywall_ajax(ajax_data)})
+base.container.find('#jpw_unlock_popup .btn.no').off('click').on('click',function(e){$.magnificPopup.close()})
+base.container.find('.jpw_manage_status .subscription').off('click').on('click',function(e){base.open_form(e,'#jpw_cancel_subs_popup')})
+base.container.find('#jpw_cancel_subs_popup .btn.yes').off('click').on('click',function(e){var nonce=base.container.find('#jpw_cencel_subs').val();e.preventDefault()
+e.stopPropagation()
+var $element=$(this),ajax_data={cancel_subscription:'yes',action:'cancel_subs_handler',nonce:nonce}
+$element.find('.fa-spinner').show();$element.find('span').hide();if(base.xhr!==null){base.xhr.abort()}
+base.paywall_ajax(ajax_data)})
+base.container.find('#jpw_cancel_subs_popup .btn.no').off('click').on('click',function(e){$.magnificPopup.close()})
+if(!base.user_login){base.login_button.off('click')
+base.package_item_button.off('click')
+if(base.form_login.length>0){if(jnewsoption.custom_login===''){var package_item_button=base.package_item_button.attr("href","#jeg_loginform")
+var login_button=base.login_button.attr("href","#jeg_loginform")
+base.open_form_login(login_button)
+base.open_form_login(package_item_button)}else{var package_item_button=base.package_item_button.attr("href","#")
+package_item_button.on('click',function(e){e.preventDefault()
+$.magnificPopup.open({type:'inline',removalDelay:500,mainClass:'mfp-zoom-out',items:{src:'#jeg_loginform',},callbacks:{beforeOpen:function(){this.st.mainClass='mfp-zoom-out'
+$('body').removeClass('jeg_show_menu')},}})})}}else{base.login_button.on('click',function(e){e.preventDefault()
+alert('Please login to buy!')})
+base.package_item_button.on('click',function(e){e.preventDefault()
+e.stopPropagation()
+alert('Please login to buy!')})}
+base.container.find('.jpw-wrapper .package-item .button').on('click',function(e){var $element=$(this),productID=$element.attr('data-product_id'),ajax_data={product_id:productID,action:'refresh_checkout_redirect'};document.cookie='paywall_product = '+productID+'; path = '+base.path+'; domain = '+base.domain
+base.xhr=$.ajax({url:jnews_ajax_url,type:'post',dataType:'json',data:ajax_data,}).done(function(data){jnewsoption.login_reload=data.login_reload})
+$('#jeg_loginform form > p:nth-child(2)').text(jnewsoption.paywall_login)
+$('#jeg_registerform form > p:nth-child(2)').text(jnewsoption.paywall_register)})}else{base.container.find('.jpw-wrapper .package-item .button').off('click').on('click',function(e){e.preventDefault()
+e.stopPropagation()
+var $element=$(this),productID=$element.attr('data-product_id'),ajax_data={product_id:productID,after_checkout:base.page_redirect(),action:'add_paywall_product'}
+$element.find('.fa-spinner').show();$element.find('span').hide();if(base.xhr!==null){base.xhr.abort()}
+base.paywall_ajax(ajax_data)})}
+base.container.find('.woocommerce-MyAccount-paymentMethods .stripepaywall .delete').off('click').on('click',function(e){e.preventDefault()
+e.stopPropagation()
+var $element=$(this)
+var sourceID=$element.attr('data-source_id'),ajax_data={source_id:sourceID,action:'delete_source_handler'}
+$element.find('.fa-spinner').show();$element.find('span').hide();if(base.xhr!==null){base.xhr.abort()}
+base.paywall_ajax(ajax_data)})
+base.container.find('.woocommerce-MyAccount-paymentMethods .stripepaywall .default').off('click').on('click',function(e){e.preventDefault()
+e.stopPropagation()
+var $element=$(this)
+var sourceID=$element.attr('data-source_id'),ajax_data={source_id:sourceID,action:'default_source_handler'}
+$element.find('.fa-spinner').show();$element.find('span').hide();if(base.xhr!==null){base.xhr.abort()}
+base.paywall_ajax(ajax_data)})},page_redirect:function(){var urlParams=new URLSearchParams(window.location.search);return urlParams.get('jpw_after_checkout')},set_after_checkout:function(){var base=this;if(base.container.hasClass('woocommerce-checkout')){var after_checkout=base.page_redirect();if(after_checkout){document.cookie='jpw_after_checkout ='+after_checkout+"; path= "+base.path+'; domain = '+base.domain}else{document.cookie='jpw_after_checkout = default; path = '+base.path+'; domain = '+base.domain+'; secure'}}},paywall_ajax:function(ajaxdata){var base=this
+base.xhr=$.ajax({url:jnews_ajax_url,type:'post',dataType:'json',data:ajaxdata,}).done(function(data){if(data.redirect){window.location.href=data.redirect}else{location.reload()}})},open_form:function(e,popup_id){e.preventDefault()
+$.magnificPopup.open({removalDelay:500,midClick:!0,mainClass:'mfp-zoom-out',type:'inline',items:{src:popup_id}})},open_form_login:function(popuplink){window.jnews.loginregister.show_popup(popuplink);window.jnews.loginregister.hook_form()}}
+jnews.paywall.init()}
+$(document).on('jnews-ajax-load',main);$(function(){main()})})(jQuery)
